@@ -55,3 +55,6 @@ dkms.conf
 *.log
 test/*.txt
 example/*.txt
+*.sublime-workspace
+
+*.sublime-project
