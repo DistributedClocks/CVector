@@ -1,10 +1,5 @@
 #include "vclock.h"
 
-/*struct vectorClock {
-    pid_t id;
-    uint32_t time;
-    UT_hash_handle hh;          
-};*/
 
 char * returnVCString(struct vectorClock *vc);
 int id_sort(struct vectorClock *a, struct vectorClock *b);
