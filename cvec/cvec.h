@@ -26,7 +26,7 @@ struct goLog {
 	// if False, PrepareSend and UnpackReceive will simply forward their input
 	//buffer to output and locally log event. If True, VC will be encoded into packet on wire
 	int VConWire;
-	char logfile[FILE_MAX];	//Logfile name
+	char logName[FILE_MAX];	//Logfile name
 	// Publisher to enable sending messages to a vecbroker.
 /*	publisher *GoPublisher
 
@@ -42,5 +42,5 @@ struct clockPayload {
 };
 
 struct goLog *initialize(char * pid, char * logName);
-char *prepareSend(struct goLog *gl, char * msg, int * msgLen);
-char *unpackReceive(struct goLog *gl, char * encodedBuffer, int bufLen);
+char *prepareSend(struct goLog *gl, char * logMsg, char* packetContent, int * encodeLen);
+char *unpackReceive(struct goLog *gl,  char * logMsg, char * encodedBuffer, int bufLen);

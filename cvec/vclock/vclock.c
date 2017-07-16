@@ -11,7 +11,7 @@ struct vectorClock * clockInit(char * c_id) {
     struct vectorClock *newClock = NULL;
     struct vectorClock *clock = (struct vectorClock*)malloc(sizeof(struct vectorClock));
     strcpy(clock->id,  c_id);
-    clock->time = 0;
+    clock->time = 1;
     HASH_ADD_STR(newClock, id, clock);
     return newClock;
 }

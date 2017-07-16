@@ -10,6 +10,31 @@ int printNBytes(char * receiveBuffer, int num) {
     printf("\n");
     return i;
 }
+
+int writeLogMsg(struct goLog *gl, char* msg) {
+    
+
+    FILE *vectorLog = fopen(gl->logName, "a+");
+    if (vectorLog == NULL){
+        perror("ERROR: Could not open log file.");
+        return EXIT_FAILURE;
+    }
+    char * vcString = returnVCString(gl->vc);
+    char logMessage[VC_ID_LENGTH + strlen(msg) + strlen(vcString)];
+    int len = 0;
+    len = sprintf(logMessage, "%s %s\n%s\n", gl->pid, vcString, msg);
+/*    len = sprintf(logMessage+len, " ");
+    len = sprintf(logMessage+len, vcString);
+    len = sprintf(logMessage+len, "\n");
+    len = sprintf(logMessage+len, msg);
+    len = sprintf(logMessage+len, "\n");*/
+
+    fputs(logMessage, vectorLog);
+    fclose(vectorLog);
+    return EXIT_SUCCESS;
+
+}
+
 struct goLog *initialize(char * pid, char * logName) {
 
     char logBuf[FILE_MAX];
@@ -23,9 +48,9 @@ struct goLog *initialize(char * pid, char * logName) {
         perror("ERROR: Could not open log file.");
         return NULL;
     }
-
     struct goLog *gl = (struct goLog*) malloc(sizeof(struct goLog));
     strcpy(gl->pid, pid);
+    strncpy(gl->logName, logBuf, FILE_MAX); 
 
     gl->printonscreen = 1;
     gl->debugmode = 0;
@@ -33,13 +58,19 @@ struct goLog *initialize(char * pid, char * logName) {
 
     struct vectorClock *vc = clockInit(gl->pid);
     gl->vc = vc;
-    fprintf(vectorLog,"Initialization Complete\n%s %s",
+    fprintf(vectorLog,"%s %s\nInitialization Complete\n",
          gl->pid, returnVCString(vc));
     fclose(vectorLog);
     return gl;
 }
 
 void mergeRemoteClock(struct goLog *gl, struct vectorClock * remoteClock) {
+    
+    int time = findTicks(gl->vc, gl->pid);
+    if (time == -1) {
+        perror("ERROR: Could not find process id in its vector clock.");
+        return;
+    }
     merge(gl->vc,remoteClock);
 }
 /*
@@ -108,7 +139,7 @@ char *unpackReceive(struct goLog *gl, char * encodedBuffer, int bufLen) {
 }
 */
 
-char *prepareSend(struct goLog *gl, char * msg, int *encodeLen) {
+char *prepareSend(struct goLog *gl, char * logMsg, char* packetContent, int * encodeLen) {
 
     struct vectorClock *vc = gl->vc;
     if (vc == NULL) {
@@ -124,13 +155,18 @@ char *prepareSend(struct goLog *gl, char * msg, int *encodeLen) {
 
     int num_clocks = HASH_COUNT(vc);
     tick(&vc, gl->pid);
+    
+    int logErr = writeLogMsg(gl, logMsg);
+
+
+
     // encode to memory buffer
     char* data;
     size_t size;
     mpack_writer_t writer;
     mpack_writer_init_growable(&writer, &data, &size);
     mpack_write_cstr(&writer, gl->pid);
-    mpack_write_cstr(&writer, msg);
+    mpack_write_cstr(&writer, packetContent);
 
     mpack_start_map(&writer, num_clocks);
     struct vectorClock *clock;
@@ -148,7 +184,7 @@ char *prepareSend(struct goLog *gl, char * msg, int *encodeLen) {
     return (char*) data;
 }
 
-char *unpackReceive(struct goLog *gl, char * encodedBuffer, int bufLen) {
+char *unpackReceive(struct goLog *gl,  char * logMsg, char * encodedBuffer, int bufLen) {
 
     mpack_reader_t reader;
     mpack_reader_init_data(&reader, encodedBuffer, bufLen);
@@ -176,6 +212,8 @@ char *unpackReceive(struct goLog *gl, char * encodedBuffer, int bufLen) {
     printf("Decoded Message: %s\n",msg );
     printf("Decoded Clock: ");
     printVC(vc);*/
+    tick(&gl->vc, gl->pid);
     mergeRemoteClock(gl, vc);
+    int logErr = writeLogMsg(gl, logMsg);
     return msg;
 }

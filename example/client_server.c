@@ -87,7 +87,7 @@ int server(void)
             exit(1);
         }
         memset(msg,0,10);
-        strncpy(msg, unpackReceive(gl, buf, numbytes), 10);
+        strncpy(msg, unpackReceive(gl, "Received message from client.", buf, numbytes), 10);
         printf("Received message from server:\n");
         printVC(gl->vc);
         printf("Received: %s\n", msg);
@@ -105,7 +105,7 @@ int server(void)
         memset(msg,0,10);
 
         sprintf(msg, "%d", n);
-        char * inBuf = prepareSend(gl, msg, &size);
+        char * inBuf = prepareSend(gl, "Replying to client.", msg, &size);
         printf("Sending message to client\n");
         if ((numbytes = sendto(sockfd, inBuf, size, 0,
                  (struct sockaddr *)&their_addr, addr_len)) == -1) {
@@ -175,7 +175,7 @@ int client()
         char msg[10];
         sprintf(msg, "%d", i);
         int size;
-        char * inBuf = prepareSend(gl, msg, &size);
+        char * inBuf = prepareSend(gl, "Sending message to server.", msg, &size);
         printf("Sending message to server\n");
         if ((numbytes = sendto(sockfd, inBuf, size, 0,
                  servinfo->ai_addr, servinfo->ai_addrlen)) == -1) {
@@ -189,7 +189,7 @@ int client()
             exit(1);
         }
         memset(msg,0,10);
-        strncpy(msg, unpackReceive(gl, buf, numbytes), 10);
+        strncpy(msg, unpackReceive(gl, "Received message from server.", buf, numbytes), 10);
         printf("Received message from client:\n");
         printVC(gl->vc);
         printf("Got back: %s\n", msg);
