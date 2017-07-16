@@ -14,7 +14,7 @@
 #include <netdb.h>
 #include <sys/wait.h>
 #include <signal.h>
-#include "../cvec/cvec.h"
+#include "../src/cvec.h"
 #define SERVERPORT "8080"    // the server port will be connecting to
 #define CLIENTPORT "8081"    // the server port will be connecting to
 #define MAXBUFLEN 100

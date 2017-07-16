@@ -18,13 +18,13 @@ int main(int argc, char *argv[]) {
     printf("Encoding...\n");
     printf("Message: %s\n",hello );
     int size;
-    char  * result  = prepareSend(gl2, hello, &size);
+    char  * result  = prepareSend(gl2, hello, "This is going to be written to file.", &size);
     printf("%s\n",result );
     tick(&gl1->vc, gl1->pid);
     tick(&gl1->vc, "brackabracka");
     printf("Clock 1...\n");
     printVC(gl1->vc);
-    char * msg = unpackReceive(gl1, result, 150);
+    char * msg = unpackReceive(gl1, result,"This has been unpacked from file.", 150);
     printf("After decoding...\n");
     printf("Message: %s\n", msg );
     printVC(gl1->vc);

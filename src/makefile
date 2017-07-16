@@ -1,8 +1,8 @@
 # CC = gcc
 # CFLAGS += -c -Wextra -Wall -g3 -std=gnu11
 # LDFlags := 
-DEPS = ../src/cvec.h ../src/vclock/vclock.h ../src/mpack/src/mpack/mpack.h
-app = client_server
+DEPS = cvec.h vclock/vclock.h mpack/src/mpack/mpack.h
+app = cvec_test
 
 objects := $(patsubst %.h,%.o, $(DEPS))
 

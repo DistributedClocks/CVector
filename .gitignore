@@ -58,3 +58,9 @@ example/*.txt
 *.sublime-workspace
 
 *.sublime-project
+
+src/cvec_test
+
+example/client_server
+
+src/vclock/clock_test
