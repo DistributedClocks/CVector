@@ -1093,60 +1093,60 @@ void mpack_write_object_bytes(mpack_writer_t* writer, const char* data, size_t b
  */
 
 MPACK_STATIC_INLINE void mpack_encode_fixuint(char* p, uint8_t value) {
-    mpack_assert(value <= 127);
+    mpack_assert(value <= 127, "value %i is larger than 127", value);
     mpack_store_u8(p, value);
 }
 
 MPACK_STATIC_INLINE void mpack_encode_u8(char* p, uint8_t value) {
-    mpack_assert(value > 127);
+    mpack_assert(value > 127, "value %i is smaller than 127", value);
     mpack_store_u8(p, 0xcc);
     mpack_store_u8(p + 1, value);
 }
 
 MPACK_STATIC_INLINE void mpack_encode_u16(char* p, uint16_t value) {
-    mpack_assert(value > UINT8_MAX);
+    mpack_assert(value > UINT8_MAX, "value %i is smaller than 255", value);
     mpack_store_u8(p, 0xcd);
     mpack_store_u16(p + 1, value);
 }
 
 MPACK_STATIC_INLINE void mpack_encode_u32(char* p, uint32_t value) {
-    mpack_assert(value > UINT16_MAX);
+    mpack_assert(value > UINT16_MAX, "value %i is smaller than 65535", value);
     mpack_store_u8(p, 0xce);
     mpack_store_u32(p + 1, value);
 }
 
 MPACK_STATIC_INLINE void mpack_encode_u64(char* p, uint64_t value) {
-    mpack_assert(value > UINT32_MAX);
+    mpack_assert(value > UINT32_MAX, "value %i is smaller than 4294967295", value);
     mpack_store_u8(p, 0xcf);
     mpack_store_u64(p + 1, value);
 }
 
 MPACK_STATIC_INLINE void mpack_encode_fixint(char* p, int8_t value) {
     // this can encode positive or negative fixints
-    mpack_assert(value >= -32);
+    mpack_assert(value >= -32, "value %i is smaller than -32", value);
     mpack_store_i8(p, value);
 }
 
 MPACK_STATIC_INLINE void mpack_encode_i8(char* p, int8_t value) {
-    mpack_assert(value < -32);
+    mpack_assert(value < -32, "value %i is larger than -32", value);
     mpack_store_u8(p, 0xd0);
     mpack_store_i8(p + 1, value);
 }
 
 MPACK_STATIC_INLINE void mpack_encode_i16(char* p, int16_t value) {
-    mpack_assert(value < INT8_MIN);
+    mpack_assert(value < INT8_MIN, "value %i is larger than -128", value);
     mpack_store_u8(p, 0xd1);
     mpack_store_i16(p + 1, value);
 }
 
 MPACK_STATIC_INLINE void mpack_encode_i32(char* p, int32_t value) {
-    mpack_assert(value < INT16_MIN);
+    mpack_assert(value < INT16_MIN, "value %i is larger than -32768", value);
     mpack_store_u8(p, 0xd2);
     mpack_store_i32(p + 1, value);
 }
 
 MPACK_STATIC_INLINE void mpack_encode_i64(char* p, int64_t value) {
-    mpack_assert(value < INT32_MIN);
+    mpack_assert(value < INT32_MIN, "value %i is larger than –2147483648", value);
     mpack_store_u8(p, 0xd3);
     mpack_store_i64(p + 1, value);
 }
@@ -1162,60 +1162,60 @@ MPACK_STATIC_INLINE void mpack_encode_double(char* p, double value) {
 }
 
 MPACK_STATIC_INLINE void mpack_encode_fixarray(char* p, uint8_t count) {
-    mpack_assert(count <= 15);
+    mpack_assert(count <= 15, "count %i is larger than 15", count);
     mpack_store_u8(p, (uint8_t)(0x90 | count));
 }
 
 MPACK_STATIC_INLINE void mpack_encode_array16(char* p, uint16_t count) {
-    mpack_assert(count > 15);
+    mpack_assert(count > 15, "count %i is smaller than 15", count);
     mpack_store_u8(p, 0xdc);
     mpack_store_u16(p + 1, count);
 }
 
 MPACK_STATIC_INLINE void mpack_encode_array32(char* p, uint32_t count) {
-    mpack_assert(count > UINT16_MAX);
+    mpack_assert(count > UINT16_MAX, "count %i is smaller than 65535", count);
     mpack_store_u8(p, 0xdd);
     mpack_store_u32(p + 1, count);
 }
 
 MPACK_STATIC_INLINE void mpack_encode_fixmap(char* p, uint8_t count) {
-    mpack_assert(count <= 15);
+    mpack_assert(count <= 15, "value %i is larger than 15", value);
     mpack_store_u8(p, (uint8_t)(0x80 | count));
 }
 
 MPACK_STATIC_INLINE void mpack_encode_map16(char* p, uint16_t count) {
-    mpack_assert(count > 15);
+    mpack_assert(count > 15, "count %i is smaller than 15", count);
     mpack_store_u8(p, 0xde);
     mpack_store_u16(p + 1, count);
 }
 
 MPACK_STATIC_INLINE void mpack_encode_map32(char* p, uint32_t count) {
-    mpack_assert(count > UINT16_MAX);
+    mpack_assert(count > UINT16_MAX, "count %i is smaller than 65535", count);
     mpack_store_u8(p, 0xdf);
     mpack_store_u32(p + 1, count);
 }
 
 MPACK_STATIC_INLINE void mpack_encode_fixstr(char* p, uint8_t count) {
-    mpack_assert(count <= 31);
+    mpack_assert(count <= 31, "count %i is larger than 31", count);
     mpack_store_u8(p, (uint8_t)(0xa0 | count));
 }
 
 MPACK_STATIC_INLINE void mpack_encode_str8(char* p, uint8_t count) {
     // TODO: str8 had no counterpart in MessagePack 1.0; there was only
     // fixraw, raw16 and raw32. This should not be used in compatibility mode.
-    mpack_assert(count > 31);
+    mpack_assert(count > 31, "count %i is smaller than 31", count);
     mpack_store_u8(p, 0xd9);
     mpack_store_u8(p + 1, count);
 }
 
 MPACK_STATIC_INLINE void mpack_encode_str16(char* p, uint16_t count) {
-    mpack_assert(count > UINT8_MAX);
+    mpack_assert(count > UINT8_MAX, "count %i is smaller than 255", count);
     mpack_store_u8(p, 0xda);
     mpack_store_u16(p + 1, count);
 }
 
 MPACK_STATIC_INLINE void mpack_encode_str32(char* p, uint32_t count) {
-    mpack_assert(count > UINT16_MAX);
+    mpack_assert(count > UINT16_MAX, "count %i is smaller than 65535", count);
     mpack_store_u8(p, 0xdb);
     mpack_store_u32(p + 1, count);
 }
@@ -1226,13 +1226,13 @@ MPACK_STATIC_INLINE void mpack_encode_bin8(char* p, uint8_t count) {
 }
 
 MPACK_STATIC_INLINE void mpack_encode_bin16(char* p, uint16_t count) {
-    mpack_assert(count > UINT8_MAX);
+    mpack_assert(count > UINT8_MAX, "count %i is smaller than 255", count);
     mpack_store_u8(p, 0xc5);
     mpack_store_u16(p + 1, count);
 }
 
 MPACK_STATIC_INLINE void mpack_encode_bin32(char* p, uint32_t count) {
-    mpack_assert(count > UINT16_MAX);
+    mpack_assert(count > UINT16_MAX, "count %i is smaller than 65535", count);
     mpack_store_u8(p, 0xc6);
     mpack_store_u32(p + 1, count);
 }
@@ -1263,21 +1263,22 @@ MPACK_STATIC_INLINE void mpack_encode_fixext16(char* p, int8_t exttype) {
 }
 
 MPACK_STATIC_INLINE void mpack_encode_ext8(char* p, int8_t exttype, uint8_t count) {
-    mpack_assert(count != 1 && count != 2 && count != 4 && count != 8 && count != 16);
+    mpack_assert(count != 1 && count != 2 && count != 4 && count != 8 && count != 16,
+        "count %i is not an extension length", count);
     mpack_store_u8(p, 0xc7);
     mpack_store_u8(p + 1, count);
     mpack_store_i8(p + 2, exttype);
 }
 
 MPACK_STATIC_INLINE void mpack_encode_ext16(char* p, int8_t exttype, uint16_t count) {
-    mpack_assert(count > UINT8_MAX);
+    mpack_assert(count > UINT8_MAX, "count %i is smaller than 255", count);
     mpack_store_u8(p, 0xc8);
     mpack_store_u16(p + 1, count);
     mpack_store_i8(p + 3, exttype);
 }
 
 MPACK_STATIC_INLINE void mpack_encode_ext32(char* p, int8_t exttype, uint32_t count) {
-    mpack_assert(count > UINT16_MAX);
+    mpack_assert(count > UINT16_MAX, "count %i is smaller than 65535", count);
     mpack_store_u8(p, 0xc9);
     mpack_store_u32(p + 1, count);
     mpack_store_i8(p + 5, exttype);

@@ -1,13 +1,12 @@
 /*
 ** listener.c -- a datagram sockets "server" demo
 */
+#include "../src/cvec.h"
 
-#include <stdio.h>
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <netdb.h>
 
-#include "../src/cvec.h"
 #define SERVERPORT "8080"    // the server port will be connecting to
 #define CLIENTPORT "8081"    // the server port will be connecting to
 #define MAXBUFLEN 100
@@ -106,7 +105,6 @@ int server()
             perror("talker: sendto");
             exit(1);
         }
-        sleep(1);
     }
     freeaddrinfo(servinfo);
     close(sockfd);
@@ -187,7 +185,6 @@ int client()
         printf("Received message from client:\n");
         printVC(gl->vc);
         printf("Got back: %s\n", msg);
-        sleep(1);
     }
 
 
