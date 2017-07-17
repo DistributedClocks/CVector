@@ -3,23 +3,17 @@
 */
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <unistd.h>
-#include <errno.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
-#include <sys/wait.h>
-#include <signal.h>
+
 #include "../src/cvec.h"
 #define SERVERPORT "8080"    // the server port will be connecting to
 #define CLIENTPORT "8081"    // the server port will be connecting to
 #define MAXBUFLEN 100
 #define MESSAGES 10
 int server_pid = -1;
+
 
 // get sockaddr, IPv4 or IPv6:
 void *get_in_addr(struct sockaddr *sa)
@@ -31,7 +25,7 @@ void *get_in_addr(struct sockaddr *sa)
     return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
 
-int server(void)
+int server()
 {
     int sockfd;
     struct addrinfo hints, *servinfo, *p;

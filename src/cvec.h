@@ -24,22 +24,22 @@
  */
 
 #include "./vclock/vclock.h"
-#include "./mpack/src/mpack/mpack.h"
-#include "./mpack/src/mpack/mpack-config.h"
+#include "./mpack/mpack.h"
+#include "./mpack/mpack-config.h"
 #include <sys/stat.h>
 #include <libgen.h>
-
+#include <pthread.h>
 
 #define FILE_MAX 256
 //This is the Global Variable Struct that holds all the info needed to be maintained
 struct goLog {
-	char pid[VC_ID_LENGTH];
-	struct vectorClock *vc;
-	int printonscreen;
-	int realtime;
-	int debugmode;
-	int logging;
-	char logName[FILE_MAX];
+    char pid[VC_ID_LENGTH];
+    struct vectorClock *vc;
+    int printonscreen;
+    int realtime;
+    int debugmode;
+    int logging;
+    char logName[FILE_MAX];
 };
 
 struct goLog *initialize(char * pid, char * logName);

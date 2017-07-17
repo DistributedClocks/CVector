@@ -4,10 +4,12 @@ CVEC_DIR    := $(MAKE_DIR)/src/
 VCLOCK_DIR  := $(MAKE_DIR)/src/vclock
 EXAMPLE_DIR := $(MAKE_DIR)/example
 
-LIBS := -ldriver -ldebug -lmw -lm -lpthread
 CC = gcc
-CFLAGS := -c -Wextra -Wall -g3 -std=gnu11
-LDFLAGS := 
+CFLAGS += -c -Wextra -Wall -Wall -Wshadow -Wpointer-arith -Wcast-qual
+CFLAGS += -m64 -std=gnu11 -pedantic
+# CFLAGS += -Wstrict-prototypes -Wmissing-prototypes
+
+LDFLAGS :=
 
 
 export MAKE_DIR CC CFLAGS LDFLAGS

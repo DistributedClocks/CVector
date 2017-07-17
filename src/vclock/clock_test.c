@@ -1,4 +1,4 @@
-#include "vclock.h"
+#include "../vclock/vclock.h"
 
 void testBasicInit() {
     struct vectorClock * n = NULL;
@@ -73,7 +73,7 @@ void testMerge() {
     }
 }
 
-int main(int argc, char *argv[]) {
+int main() {
     testBasicInit();
     testCopy();
     testMerge();

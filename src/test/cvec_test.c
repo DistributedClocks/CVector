@@ -1,9 +1,9 @@
-#include "cvec.h"
+#include "../cvec.h"
 /*
  * Print reverse byte buffer including specified length
  */
 
-int main(int argc, char *argv[]) {
+int main() {
 
     struct goLog *gl1 = initialize("client","mylogfile");
     char hello[100];
@@ -29,10 +29,8 @@ int main(int argc, char *argv[]) {
     printf("Message: %s\n", msg );
     printVC(gl1->vc);
 
-    struct goLog *gl = initialize("client","clientlogfile");
-
-
-/*    int i;
+/*    struct goLog *gl = initialize("client","clientlogfile");
+    int i;
     for (i = 0; i < 5; i++) {
         char msg[10];
         sprintf(msg, "%d", i);

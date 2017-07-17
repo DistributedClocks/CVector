@@ -20,6 +20,7 @@ objects := $(patsubst %.h,%.o, $(DEPS))
 simplemake: $(app).o $(objects)
 	@$(CC) -o $(app) $(app).o $(objects) $(LDFLAGS)
 	@-rm -r $(app).o
+	@-rm -r $(objects)
 
 clean:
 	@echo "Cleaning..."

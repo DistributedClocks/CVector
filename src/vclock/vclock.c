@@ -11,7 +11,7 @@ struct vectorClock * clockInit(char * c_id) {
     struct vectorClock *newClock = NULL;
     struct vectorClock *clock = (struct vectorClock*)malloc(sizeof(struct vectorClock));
     strcpy(clock->id,  c_id);
-    clock->time = 1;
+    clock->time = 0;
     HASH_ADD_STR(newClock, id, clock);
     return newClock;
 }
@@ -123,8 +123,8 @@ struct vectorClock * sort_by_id(struct vectorClock *vc) {
 }
 
 /**TODO: Figure out requirements for vector clock comparison.**/
-int compare(struct vectorClock *vc, struct vectorClock *other, int condition) {
+/*int compare(struct vectorClock *vc, struct vectorClock *other, int condition) {
     return 0;
-}
+}*/
 
 

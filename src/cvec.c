@@ -24,7 +24,7 @@
  */
 
 #include "cvec.h"
-
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 int writeLogMsg(struct goLog *gl, char* msg) {
     
@@ -49,10 +49,9 @@ struct goLog *initialize(char * pid, char * logName) {
 
     char logBuf[FILE_MAX];
     FILE *vectorLog;
-
     mkdir(dirname(logName), 0777);
-    snprintf(logBuf, FILE_MAX, "%s.log",logName);
-    
+    snprintf(logBuf, FILE_MAX, "%s.log", logName);
+
     vectorLog = fopen(logBuf, "w+");
     if (vectorLog == NULL){
         perror("ERROR: Could not open log file.");
@@ -61,12 +60,11 @@ struct goLog *initialize(char * pid, char * logName) {
     struct goLog *gl = (struct goLog*) malloc(sizeof(struct goLog));
     strcpy(gl->pid, pid);
     strncpy(gl->logName, logBuf, FILE_MAX); 
-
     gl->printonscreen = 1;
     gl->debugmode = 0;
     gl->logging = 1;
-
     struct vectorClock *vc = clockInit(gl->pid);
+    tick(&vc, gl->pid);
     gl->vc = vc;
     fprintf(vectorLog,"%s %s\nInitialization Complete\n",
          gl->pid, returnVCString(vc));
@@ -83,74 +81,35 @@ void mergeRemoteClock(struct goLog *gl, struct vectorClock * remoteClock) {
     }
     merge(gl->vc,remoteClock);
 }
-/*
-char *prepareSend(struct goLog *gl, char * msg, int msgLen) {
 
+int logLocalEvent(struct goLog *gl, char * logMsg) {
+
+    pthread_mutex_lock(&mutex);
     struct vectorClock *vc = gl->vc;
     if (vc == NULL) {
         perror("ERROR: Vector clock not initialized.");
-        return NULL;
+        return EXIT_FAILURE;
     }
     int time = findTicks(vc, gl->pid);
     if (time == -1) {
         perror("ERROR: Could not find process id in its vector clock.");
-        return NULL;
-
+        return EXIT_FAILURE;
     }
 
-    int num_clocks = HASH_COUNT(vc);
-    int encodeLen = VC_ID_LENGTH + CLOCKSIZE * num_clocks + msgLen;
-    char * encodedMsg = malloc(encodeLen);
     tick(&vc, gl->pid);
-    cw_pack_context * encodedBuffer = (struct cw_pack_context*)malloc(sizeof(struct cw_pack_context));
-    cw_pack_context_init (encodedBuffer, encodedMsg, encodeLen, 0);
-    cw_pack_map_size (encodedBuffer, num_clocks + 2);
-    cw_pack_str (encodedBuffer, gl->pid, VC_ID_LENGTH);
-    cw_pack_str (encodedBuffer, msg, msgLen);
-
-
-    struct vectorClock *clock;
-    for(clock=vc; clock != NULL; clock=(struct vectorClock*)(clock->hh.next)) {
-        cw_pack_str (encodedBuffer, clock->id, strlen(clock->id)+1);
-        cw_pack_unsigned (encodedBuffer, clock->time);
+    
+    if (writeLogMsg(gl, logMsg) == EXIT_FAILURE) {
+        perror("ERROR: Failed to log message.\n");
+        return EXIT_FAILURE;
     }
-    return (char*) encodedBuffer;
-}
+    pthread_mutex_unlock(&mutex);
 
-char *unpackReceive(struct goLog *gl, char * encodedBuffer, int bufLen) {
-    // init unpacking
-    cw_unpack_context uc;
-    cw_unpack_context_init (&uc, ((cw_pack_context *) encodedBuffer)->start, bufLen,  0);
-    struct vectorClock *vc = NULL;
-    char pid[VC_ID_LENGTH];
-    char * msg = malloc(bufLen);
-    // get the total map size
-    cw_unpack_next(&uc);
-    int i = uc.item.as.map.size;
-    // get the process id
-    cw_unpack_next(&uc);
-    // get the encoded message
-    cw_unpack_next(&uc);
-    strncpy(msg, uc.item.as.str.start, bufLen);
-    // reassemble the vector clock
-    for (; i > 0; i--) {
-        cw_unpack_next(&uc);
-        if (uc.item.type == CWP_ITEM_STR) {
-            strcpy(pid, uc.item.as.str.start);
-            cw_unpack_next(&uc);
-            if (uc.item.type == CWP_ITEM_POSITIVE_INTEGER) {
-                uint64_t time = uc.item.as.u64;
-                set(&vc, pid, time);
-            }
-        }
-    }
-    mergeRemoteClock(gl, vc);
-    return msg;
+    return EXIT_SUCCESS;
 }
-*/
 
 char *prepareSend(struct goLog *gl, char * logMsg, char* packetContent, int * encodeLen) {
 
+    pthread_mutex_lock(&mutex);
     struct vectorClock *vc = gl->vc;
     if (vc == NULL) {
         perror("ERROR: Vector clock not initialized.");
@@ -160,15 +119,12 @@ char *prepareSend(struct goLog *gl, char * logMsg, char* packetContent, int * en
     if (time == -1) {
         perror("ERROR: Could not find process id in its vector clock.");
         return NULL;
-
     }
-
-    int num_clocks = HASH_COUNT(vc);
     tick(&vc, gl->pid);
     
-    int logErr = writeLogMsg(gl, logMsg);
-
-
+    if (writeLogMsg(gl, logMsg) == EXIT_FAILURE) {
+        perror("ERROR: Failed to log message.\n");
+    }
 
     // encode to memory buffer
     char* data;
@@ -178,7 +134,7 @@ char *prepareSend(struct goLog *gl, char * logMsg, char* packetContent, int * en
     mpack_write_cstr(&writer, gl->pid);
     mpack_write_cstr(&writer, packetContent);
 
-    mpack_start_map(&writer, num_clocks);
+    mpack_start_map(&writer, HASH_COUNT(vc));
     struct vectorClock *clock;
     for(clock=vc; clock != NULL; clock=(struct vectorClock*)(clock->hh.next)) {
         mpack_write_cstr(&writer, clock->id);
@@ -191,11 +147,12 @@ char *prepareSend(struct goLog *gl, char * logMsg, char* packetContent, int * en
     return NULL;
     }
     *encodeLen = writer.size;
+    pthread_mutex_unlock(&mutex);
     return (char*) data;
 }
 
 char *unpackReceive(struct goLog *gl,  char * logMsg, char * encodedBuffer, int bufLen) {
-
+    pthread_mutex_lock(&mutex);
     mpack_reader_t reader;
     mpack_reader_init_data(&reader, encodedBuffer, bufLen);
 
@@ -224,6 +181,9 @@ char *unpackReceive(struct goLog *gl,  char * logMsg, char * encodedBuffer, int 
     printVC(vc);*/
     tick(&gl->vc, gl->pid);
     mergeRemoteClock(gl, vc);
-    int logErr = writeLogMsg(gl, logMsg);
+    if (writeLogMsg(gl, logMsg) == EXIT_FAILURE) {
+        perror("ERROR: Failed to log message.\n");
+    }
+    pthread_mutex_unlock(&mutex);
     return msg;
 }
