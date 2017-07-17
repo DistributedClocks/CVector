@@ -5,10 +5,10 @@
 
 int main() {
 
-    struct goLog *gl1 = initialize("client","mylogfile");
+    struct vcLog *gl1 = initialize("client","mylogfile");
     char hello[100];
     strcpy(hello, "MYMSG");
-    struct goLog *gl2 = initialize("testingClock","mylogbile");
+    struct vcLog *gl2 = initialize("testingClock","mylogbile");
     tick(&gl2->vc, "testingClock");
     tick(&gl2->vc, "testingClock");
     tick(&gl2->vc, "testingClock");
@@ -29,7 +29,7 @@ int main() {
     printf("Message: %s\n", msg );
     printVC(gl1->vc);
 
-/*    struct goLog *gl = initialize("client","clientlogfile");
+/*    struct vcLog *gl = initialize("client","clientlogfile");
     int i;
     for (i = 0; i < 5; i++) {
         char msg[10];

@@ -26,27 +26,7 @@
 #include "cvec.h"
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
-int writeLogMsg(struct goLog *gl, char* msg) {
-    
-
-    FILE *vectorLog = fopen(gl->logName, "a+");
-    if (vectorLog == NULL){
-        perror("ERROR: Could not open log file.");
-        return EXIT_FAILURE;
-    }
-    char * vcString = returnVCString(gl->vc);
-    char logMessage[VC_ID_LENGTH + strlen(msg) + strlen(vcString)];
-
-    sprintf(logMessage, "%s %s\n%s\n", gl->pid, vcString, msg);
-
-    fputs(logMessage, vectorLog);
-    fclose(vectorLog);
-    return EXIT_SUCCESS;
-
-}
-
-struct goLog *initialize(char * pid, char * logName) {
-
+struct vcLog *initialize(char * pid, char * logName) {
     char logBuf[FILE_MAX];
     FILE *vectorLog;
     mkdir(dirname(logName), 0777);
@@ -57,11 +37,10 @@ struct goLog *initialize(char * pid, char * logName) {
         perror("ERROR: Could not open log file.");
         return NULL;
     }
-    struct goLog *gl = (struct goLog*) malloc(sizeof(struct goLog));
+    struct vcLog *gl = (struct vcLog*) malloc(sizeof(struct vcLog));
     strcpy(gl->pid, pid);
     strncpy(gl->logName, logBuf, FILE_MAX); 
     gl->printonscreen = 1;
-    gl->debugmode = 0;
     gl->logging = 1;
     struct vectorClock *vc = clockInit(gl->pid);
     tick(&vc, gl->pid);
@@ -72,18 +51,23 @@ struct goLog *initialize(char * pid, char * logName) {
     return gl;
 }
 
-void mergeRemoteClock(struct goLog *gl, struct vectorClock * remoteClock) {
-    
-    int time = findTicks(gl->vc, gl->pid);
-    if (time == -1) {
-        perror("ERROR: Could not find process id in its vector clock.");
-        return;
+int writeLogMsg(struct vcLog *gl, char* logMsg) {
+    FILE *vectorLog = fopen(gl->logName, "a+");
+    if (vectorLog == NULL){
+        perror("ERROR: Could not open log file.");
+        return EXIT_FAILURE;
     }
-    merge(gl->vc,remoteClock);
+    char * vcString = returnVCString(gl->vc);
+    char logMessage[VC_ID_LENGTH + strlen(logMsg) + strlen(vcString)];
+
+    sprintf(logMessage, "%s %s\n%s\n", gl->pid, vcString, logMsg);
+
+    fputs(logMessage, vectorLog);
+    fclose(vectorLog);
+    return EXIT_SUCCESS;
 }
 
-int logLocalEvent(struct goLog *gl, char * logMsg) {
-
+int logLocalEvent(struct vcLog *gl, char * logMsg) {
     pthread_mutex_lock(&mutex);
     struct vectorClock *vc = gl->vc;
     if (vc == NULL) {
@@ -107,8 +91,7 @@ int logLocalEvent(struct goLog *gl, char * logMsg) {
     return EXIT_SUCCESS;
 }
 
-char *prepareSend(struct goLog *gl, char * logMsg, char* packetContent, int * encodeLen) {
-
+char *prepareSend(struct vcLog *gl, char * logMsg, char* packetContent, int * encodeLen) {
     pthread_mutex_lock(&mutex);
     struct vectorClock *vc = gl->vc;
     if (vc == NULL) {
@@ -151,7 +134,16 @@ char *prepareSend(struct goLog *gl, char * logMsg, char* packetContent, int * en
     return (char*) data;
 }
 
-char *unpackReceive(struct goLog *gl,  char * logMsg, char * encodedBuffer, int bufLen) {
+void mergeRemoteClock(struct vcLog *gl, struct vectorClock * remoteClock) {
+    int time = findTicks(gl->vc, gl->pid);
+    if (time == -1) {
+        perror("ERROR: Could not find process id in its vector clock.");
+        return;
+    }
+    merge(gl->vc,remoteClock);
+}
+
+char *unpackReceive(struct vcLog *gl,  char * logMsg, char * encodedBuffer, int bufLen) {
     pthread_mutex_lock(&mutex);
     mpack_reader_t reader;
     mpack_reader_init_data(&reader, encodedBuffer, bufLen);
@@ -175,10 +167,6 @@ char *unpackReceive(struct goLog *gl,  char * logMsg, char * encodedBuffer, int 
         set(&vc, c_pid, time);
     }
     mpack_done_map(&reader);
-/*    printf("Decoded PID: %s\n",src_pid );
-    printf("Decoded Message: %s\n",msg );
-    printf("Decoded Clock: ");
-    printVC(vc);*/
     tick(&gl->vc, gl->pid);
     mergeRemoteClock(gl, vc);
     if (writeLogMsg(gl, logMsg) == EXIT_FAILURE) {

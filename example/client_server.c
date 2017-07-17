@@ -65,7 +65,7 @@ int server()
     struct sockaddr_in their_addr;
     socklen_t addr_len = sizeof(struct sockaddr_in);
     int sockfd = initListener(SERVERPORT);
-    struct goLog *gl = initialize("server","serverlogfile");
+    struct vcLog *gl = initialize("server","serverlogfile");
 
     int i;
     int n = 0, nMinOne = 0, nMinTwo= 0;
@@ -110,7 +110,7 @@ int client()
     
     int sockfd = initListener(CLIENTPORT);
     
-    struct goLog *gl = initialize("client","clientlogfile");
+    struct vcLog *gl = initialize("client","clientlogfile");
 
     int i;
     char msg[10];
