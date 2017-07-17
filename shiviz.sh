@@ -1,6 +1,6 @@
 #!/bin/bash
-FILE=Shiviz.log
+FILE=Shiviz.txt
 echo '(?<host>\S*) (?<clock>{.*})\n(?<event>.*)' > $FILE
 echo -e "\n" >> $FILE
-cat *g.txt >> $FILE
+cat *.log >> $FILE
 
