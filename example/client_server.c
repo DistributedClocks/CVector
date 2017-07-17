@@ -65,7 +65,7 @@ int server()
     struct sockaddr_in their_addr;
     socklen_t addr_len = sizeof(struct sockaddr_in);
     int sockfd = initListener(SERVERPORT);
-    struct vcLog *gl = initialize("server","serverlogfile");
+    struct vcLog *vcInfo = initialize("server","serverlogfile");
 
     int i;
     int n = 0, nMinOne = 0, nMinTwo= 0;
@@ -73,9 +73,9 @@ int server()
     for (i = 0; i < MESSAGES; i++) {
         int numbytes = recvfrom(sockfd, buf, MAXBUFLEN-1 , 0, (struct sockaddr *)&their_addr, &addr_len);
         memset(msg,0,10);
-        strncpy(msg, unpackReceive(gl, "Received message from client.", buf, numbytes), 10);
+        strncpy(msg, unpackReceive(vcInfo, "Received message from client.", buf, numbytes), 10);
         printf("Received message from client: ");
-        printVC(gl->vc);
+        printVC(vcInfo->vc);
         if (strncmp(msg,"0",1) == 0){
                 nMinTwo = 0;
                 n = 0;
@@ -88,7 +88,7 @@ int server()
             n = nMinOne + nMinTwo;
         }
         snprintf(msg, 10, "%d", n);
-        char * inBuf = prepareSend(gl, "Replying to client.", msg, &size);
+        char * inBuf = prepareSend(vcInfo, "Replying to client.", msg, &size);
         printf("Sending message to client\n");
         sendto(sockfd, inBuf, size, 0, (struct sockaddr *)&their_addr, addr_len);
     }
@@ -110,13 +110,13 @@ int client()
     
     int sockfd = initListener(CLIENTPORT);
     
-    struct vcLog *gl = initialize("client","clientlogfile");
+    struct vcLog *vcInfo = initialize("client","clientlogfile");
 
     int i;
     char msg[10];
     for (i = 0; i < MESSAGES; i++) {
         snprintf(msg, 10, "%d", i);
-        char * inBuf = prepareSend(gl, "Sending message to server.", msg, &size);
+        char * inBuf = prepareSend(vcInfo, "Sending message to server.", msg, &size);
         printf("Sending message to server\n");
         int numbytes = sendto(sockfd, inBuf, size, 0, (struct sockaddr *)&their_addr, addr_len);
         addr_len = sizeof their_addr;
@@ -125,9 +125,9 @@ int client()
             perror("recvfrom");
             exit(1);
         }
-        strncpy(msg, unpackReceive(gl, "Received message from server.", buf, numbytes), 10);
+        strncpy(msg, unpackReceive(vcInfo, "Received message from server.", buf, numbytes), 10);
         printf("Received message from server:\n");
-        printVC(gl->vc);
+        printVC(vcInfo->vc);
         printf("Got back: %s\n", msg);
     }
 

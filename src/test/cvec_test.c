@@ -5,41 +5,41 @@
 
 int main() {
 
-    struct vcLog *gl1 = initialize("client","mylogfile");
+    struct vcLog *vcInfo1 = initialize("client","mylogfile");
     char hello[100];
     strcpy(hello, "MYMSG");
-    struct vcLog *gl2 = initialize("testingClock","mylogbile");
-    tick(&gl2->vc, "testingClock");
-    tick(&gl2->vc, "testingClock");
-    tick(&gl2->vc, "testingClock");
-    tick(&gl2->vc, "testingClock");
-    tick(&gl2->vc, "testingClock");
+    struct vcLog *vcInfo2 = initialize("testingClock","mylogbile");
+    tick(&vcInfo2->vc, "testingClock");
+    tick(&vcInfo2->vc, "testingClock");
+    tick(&vcInfo2->vc, "testingClock");
+    tick(&vcInfo2->vc, "testingClock");
+    tick(&vcInfo2->vc, "testingClock");
 
     printf("Encoding...\n");
     printf("Message: %s\n",hello );
     int size;
-    char  * result  = prepareSend(gl2, hello, "This is going to be written to file.", &size);
+    char  * result  = prepareSend(vcInfo2, hello, "This is going to be written to file.", &size);
     printf("%s\n",result );
-    tick(&gl1->vc, gl1->pid);
-    tick(&gl1->vc, "brackabracka");
+    tick(&vcInfo1->vc, vcInfo1->pid);
+    tick(&vcInfo1->vc, "brackabracka");
     printf("Clock 1...\n");
-    printVC(gl1->vc);
-    char * msg = unpackReceive(gl1, result,"This has been unpacked from file.", 150);
+    printVC(vcInfo1->vc);
+    char * msg = unpackReceive(vcInfo1, result,"This has been unpacked from file.", 150);
     printf("After decoding...\n");
     printf("Message: %s\n", msg );
-    printVC(gl1->vc);
+    printVC(vcInfo1->vc);
 
-/*    struct vcLog *gl = initialize("client","clientlogfile");
+/*    struct vcLog *vcInfo = initialize("client","clientlogfile");
     int i;
     for (i = 0; i < 5; i++) {
         char msg[10];
         sprintf(msg, "%d", i);
         char * inBuf[556];
-        char * result  = prepareSend(gl, msg, sizeof(msg));
-        char * endGame = unpackReceive(gl, result, 86);
+        char * result  = prepareSend(vcInfo, msg, sizeof(msg));
+        char * endGame = unpackReceive(vcInfo, result, 86);
         printf("After decoding...\n");
         printf("Message: %s\n", msg );
-        printVC(gl->vc);
+        printVC(vcInfo->vc);
     }
 */
 }

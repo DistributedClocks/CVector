@@ -37,52 +37,52 @@ struct vcLog *initialize(char * pid, char * logName) {
         perror("ERROR: Could not open log file.");
         return NULL;
     }
-    struct vcLog *gl = (struct vcLog*) malloc(sizeof(struct vcLog));
-    strcpy(gl->pid, pid);
-    strncpy(gl->logName, logBuf, FILE_MAX); 
-    gl->printonscreen = 1;
-    gl->logging = 1;
-    struct vectorClock *vc = clockInit(gl->pid);
-    tick(&vc, gl->pid);
-    gl->vc = vc;
+    struct vcLog *vcInfo = (struct vcLog*) malloc(sizeof(struct vcLog));
+    strcpy(vcInfo->pid, pid);
+    strncpy(vcInfo->logName, logBuf, FILE_MAX); 
+    vcInfo->printonscreen = 1;
+    vcInfo->logging = 1;
+    struct vectorClock *vc = clockInit(vcInfo->pid);
+    tick(&vc, vcInfo->pid);
+    vcInfo->vc = vc;
     fprintf(vectorLog,"%s %s\nInitialization Complete\n",
-         gl->pid, returnVCString(vc));
+         vcInfo->pid, returnVCString(vc));
     fclose(vectorLog);
-    return gl;
+    return vcInfo;
 }
 
-int writeLogMsg(struct vcLog *gl, char* logMsg) {
-    FILE *vectorLog = fopen(gl->logName, "a+");
+int writeLogMsg(struct vcLog *vcInfo, char* logMsg) {
+    FILE *vectorLog = fopen(vcInfo->logName, "a+");
     if (vectorLog == NULL){
         perror("ERROR: Could not open log file.");
         return EXIT_FAILURE;
     }
-    char * vcString = returnVCString(gl->vc);
+    char * vcString = returnVCString(vcInfo->vc);
     char logMessage[VC_ID_LENGTH + strlen(logMsg) + strlen(vcString)];
 
-    sprintf(logMessage, "%s %s\n%s\n", gl->pid, vcString, logMsg);
+    sprintf(logMessage, "%s %s\n%s\n", vcInfo->pid, vcString, logMsg);
 
     fputs(logMessage, vectorLog);
     fclose(vectorLog);
     return EXIT_SUCCESS;
 }
 
-int logLocalEvent(struct vcLog *gl, char * logMsg) {
+int lovcInfoocalEvent(struct vcLog *vcInfo, char * logMsg) {
     pthread_mutex_lock(&mutex);
-    struct vectorClock *vc = gl->vc;
+    struct vectorClock *vc = vcInfo->vc;
     if (vc == NULL) {
         perror("ERROR: Vector clock not initialized.");
         return EXIT_FAILURE;
     }
-    int time = findTicks(vc, gl->pid);
+    int time = findTicks(vc, vcInfo->pid);
     if (time == -1) {
         perror("ERROR: Could not find process id in its vector clock.");
         return EXIT_FAILURE;
     }
 
-    tick(&vc, gl->pid);
+    tick(&vc, vcInfo->pid);
     
-    if (writeLogMsg(gl, logMsg) == EXIT_FAILURE) {
+    if (writeLogMsg(vcInfo, logMsg) == EXIT_FAILURE) {
         perror("ERROR: Failed to log message.\n");
         return EXIT_FAILURE;
     }
@@ -91,21 +91,21 @@ int logLocalEvent(struct vcLog *gl, char * logMsg) {
     return EXIT_SUCCESS;
 }
 
-char *prepareSend(struct vcLog *gl, char * logMsg, char* packetContent, int * encodeLen) {
+char *prepareSend(struct vcLog *vcInfo, char * logMsg, char* packetContent, int * encodeLen) {
     pthread_mutex_lock(&mutex);
-    struct vectorClock *vc = gl->vc;
+    struct vectorClock *vc = vcInfo->vc;
     if (vc == NULL) {
         perror("ERROR: Vector clock not initialized.");
         return NULL;
     }
-    int time = findTicks(vc, gl->pid);
+    int time = findTicks(vc, vcInfo->pid);
     if (time == -1) {
         perror("ERROR: Could not find process id in its vector clock.");
         return NULL;
     }
-    tick(&vc, gl->pid);
+    tick(&vc, vcInfo->pid);
     
-    if (writeLogMsg(gl, logMsg) == EXIT_FAILURE) {
+    if (writeLogMsg(vcInfo, logMsg) == EXIT_FAILURE) {
         perror("ERROR: Failed to log message.\n");
     }
 
@@ -114,7 +114,7 @@ char *prepareSend(struct vcLog *gl, char * logMsg, char* packetContent, int * en
     size_t size;
     mpack_writer_t writer;
     mpack_writer_init_growable(&writer, &data, &size);
-    mpack_write_cstr(&writer, gl->pid);
+    mpack_write_cstr(&writer, vcInfo->pid);
     mpack_write_cstr(&writer, packetContent);
 
     mpack_start_map(&writer, HASH_COUNT(vc));
@@ -134,16 +134,16 @@ char *prepareSend(struct vcLog *gl, char * logMsg, char* packetContent, int * en
     return (char*) data;
 }
 
-void mergeRemoteClock(struct vcLog *gl, struct vectorClock * remoteClock) {
-    int time = findTicks(gl->vc, gl->pid);
+void mergeRemoteClock(struct vcLog *vcInfo, struct vectorClock * remoteClock) {
+    int time = findTicks(vcInfo->vc, vcInfo->pid);
     if (time == -1) {
         perror("ERROR: Could not find process id in its vector clock.");
         return;
     }
-    merge(gl->vc,remoteClock);
+    merge(vcInfo->vc,remoteClock);
 }
 
-char *unpackReceive(struct vcLog *gl,  char * logMsg, char * encodedBuffer, int bufLen) {
+char *unpackReceive(struct vcLog *vcInfo,  char * logMsg, char * encodedBuffer, int bufLen) {
     pthread_mutex_lock(&mutex);
     mpack_reader_t reader;
     mpack_reader_init_data(&reader, encodedBuffer, bufLen);
@@ -167,9 +167,9 @@ char *unpackReceive(struct vcLog *gl,  char * logMsg, char * encodedBuffer, int 
         set(&vc, c_pid, time);
     }
     mpack_done_map(&reader);
-    tick(&gl->vc, gl->pid);
-    mergeRemoteClock(gl, vc);
-    if (writeLogMsg(gl, logMsg) == EXIT_FAILURE) {
+    tick(&vcInfo->vc, vcInfo->pid);
+    mergeRemoteClock(vcInfo, vc);
+    if (writeLogMsg(vcInfo, logMsg) == EXIT_FAILURE) {
         perror("ERROR: Failed to log message.\n");
     }
     pthread_mutex_unlock(&mutex);

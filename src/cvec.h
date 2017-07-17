@@ -59,34 +59,34 @@ struct vcLog {
 struct vcLog *initialize(char * pid, char * logName);
 
 /**
- * Appends a message in the log file defined in the vcLog gl structure.
- * @param gl The vcLog configuration structure containing the vector clock.
- * @param msg Custom message which writeLogMsg will write to the "gl" log.
+ * Appends a message in the log file defined in the vcLog vcInfo structure.
+ * @param vcInfo The vcLog configuration structure containing the vector clock.
+ * @param logMsg Custom message will be written to the "vcInfo" log.
  */
-int writeLogMsg(struct vcLog *gl, char* logMsg);
+int writeLogMsg(struct vcLog *vcInfo, char* logMsg);
 
 /**
- * Records a local event and increments the vector clock contained in "gl".
- * Also appends a message in the log file defined in the vcLog gl structure.
- * @param gl The vcLog configuration structure containing the vector clock.
- * @param msg Custom message which logLocalEvent will write to the "gl" log.
+ * Records a local event and increments the vector clock contained in "vcInfo".
+ * Also appends a message in the log file defined in the vcInfo structure.
+ * @param vcInfo The vcLog configuration structure containing the vector clock.
+ * @param logMsg Custom message will be written to the "vcInfo" log.
  */
-int logLocalEvent(struct vcLog *gl, char * logMsg);
+int lovcInfoocalEvent(struct vcLog *vcInfo, char * logMsg);
 
 /**
  * Encodes a buffer into a custom CVector data structure.
- * The function increments the vector clock contained in "gl", appends it to 
+ * The function increments the vector clock contained in "vcInfo", appends it to 
  * the "packetContent" and converts the full message into MessagePack format.
  * The resulting length of the encoded package is stored in "encodeLen".
  * In addition, prepareSend writes a custom defined message "logMsg" to the 
  * main CVector log.
- * @param gl The vcLog configuration structure containing the vector clock.
- * @param logMsg Custom message which prepareSend will write to the "gl" log.
+ * @param vcInfo The vcLog configuration structure containing the vector clock.
+ * @param logMsg Custom message will be written to the "vcInfo" log.
  * @param packetContent The actual content of the packet we want to send out.
  * @param encodeLen A storage integer for the final encoded packet length.
  */
 
-char *prepareSend(struct vcLog *gl, char * logMsg, char* packetContent, int * encodeLen);
+char *prepareSend(struct vcLog *vcInfo, char * logMsg, char* packetContent, int * encodeLen);
 /**
  * Decodes a GoVector buffer, updates the local vector clock, and returns the 
  * decoded data.
@@ -95,9 +95,9 @@ char *prepareSend(struct vcLog *gl, char * logMsg, char* packetContent, int * en
  * clock with its own and returns a character representation of the data.
  * In addition, prepareSend writes a custom defined message to the main 
  * CVector log.
- * @param gl The vcLog configuration structure containing the vector clock.
- * @param logMsg Custom message which unpackReceive will write to the "gl" log.
+ * @param vcInfo The vcLog configuration structure containing the vector clock.
+ * @param logMsg Custom message will be written to the "vcInfo" log.
  * @param encodedBuffer The buffer to be decoded.
  * @param bufLen Length of the buffer to initialise the MessagPack reader.
  */
-char *unpackReceive(struct vcLog *gl,  char * logMsg, char * encodedBuffer, int bufLen);
+char *unpackReceive(struct vcLog *vcInfo,  char * logMsg, char * encodedBuffer, int bufLen);
