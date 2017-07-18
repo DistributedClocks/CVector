@@ -6,14 +6,6 @@ app = client_server
 
 objects := $(patsubst %.h,%.o, $(DEPS))
 
-# %.o: %.c $(DEPS)
-# 	$(CC) $(CFlags) -o $@ $< $(CFLAGS)
-
-# simplemake: $(app).o
-# 	@echo "Hello $(objects)"
-# 	@$(CC) -o $(app) $(app).o 
-
-
 %.o: %.c $(DEPS)
 	@$(CC) $(CFLAGS) -o $@ $<
 

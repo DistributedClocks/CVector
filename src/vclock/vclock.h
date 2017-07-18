@@ -22,6 +22,8 @@
  * DEALINGS IN THE SOFTWARE.
  * 
  */
+#ifndef _HEADER_vclock_
+#define _HEADER_vclock_
 
 #include <stdio.h> //printf
 #include "uthash/uthash.h"
@@ -162,3 +164,4 @@ char * returnVCString(struct vectorClock *vc);
  * @param vc The current vector clock map.
  */
 void printVC (struct vectorClock *vc);
+#endif
