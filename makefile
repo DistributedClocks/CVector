@@ -4,11 +4,14 @@ CVEC_DIR    := $(MAKE_DIR)/src/
 VCLOCK_DIR  := $(MAKE_DIR)/src/vclock
 EXAMPLE_DIR := $(MAKE_DIR)/example
 
+DEPS = src/cvec.h src/vclock/vclock.h src/mpack/mpack.h
+SOURCES := $(patsubst %.h,%.c, $(DEPS))
+OBJECTS := $(patsubst */%.h,%.o, $(DEPS))
+
 CC = gcc
 CFLAGS += -c -Wextra -Wall -Wall -Wshadow -Wpointer-arith -Wcast-qual
 CFLAGS += -m64 -std=gnu11 -pedantic
 # CFLAGS += -Wstrict-prototypes -Wmissing-prototypes
-
 LDFLAGS :=
 
 
@@ -27,7 +30,22 @@ clean:
 	@$(MAKE) -C $(EXAMPLE_DIR) clean
 
 
+lib: libcvec.a
+MAKE_DIR = $(PWD)
 
+all: libcvec.a
+
+cvec.o: src/cvec.c $(DEPS)
+		@$(CC) $(CFLAGS) $(SOURCES)
+
+libcvec.a: cvec.o
+		ar rcs src/libcvec.a $(OBJECTS)
+		ranlib src/libcvec.a
+		rm -f *.o
+		rm -f src/*.gch
+
+libclean:
+		rm -f *.o *.a src/*.o src/*.gch
 
 
 # srcExt = c
