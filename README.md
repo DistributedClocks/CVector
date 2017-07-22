@@ -13,14 +13,19 @@ CVector is written in ANSI C11.
 CVector has the following dependencies:
 
 VClock - A vector clock library written in C.
+```
 src/vclock/vclock.h
-
-MPack[https://github.com/ludocode/mpack] - A [MessagePack](http://msgpack.org/index.html) implementation.
+```
+[MPack](https://github.com/ludocode/mpack) - A [MessagePack](http://msgpack.org/index.html) implementation.
+```
 src/mpack/mpack.h
+```
 
 To use CVector simply import .src/cvec.h.
 You can compile your project by including the following header files:
+```
 src/vclock/cvec.h src/vclock/vclock.h src/mpack/mpack.h
+```
 
 Or by generating the libcvec library via this command:
 
