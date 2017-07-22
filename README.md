@@ -171,4 +171,4 @@ This produces the log "basiclog.shiviz" :
 
 
 An executable example of a similar program can be found in
-[Examples/client_server.c](https://github.com/DistributedClocks/CVector/blob/master/example/client_server.c)
+[example/client_server.c](https://github.com/DistributedClocks/CVector/blob/master/example/client_server.c)
