@@ -15,7 +15,7 @@ CVector has the following dependencies:
 VClock - A vector clock library written in C.
 src/vclock/vclock.h
 
-MPack - A MessagePack (http://msgpack.org/index.html) implementation.
+MPack[https://github.com/ludocode/mpack] - A [MessagePack](http://msgpack.org/index.html) implementation.
 src/mpack/mpack.h
 
 To use CVector simply import .src/cvec.h.
@@ -34,23 +34,29 @@ gcc -o myApp src/libcvec.a
 ```
 
 ### Index
-
+```
 struct vcLog *initialize(char * pid, char * logName);
-
+```
+```
 int writeLogMsg(struct vcLog *vcInfo, char* logMsg);
-
+```
+```
 int loglocalEvent(struct vcLog *vcInfo, char * logMsg);
-
+```
+```
 char *prepareSend(struct vcLog *vcInfo, char * logMsg, char* packetContent, int * encodeLen);
-
+```
+```
 char *unpackReceive(struct vcLog *vcInfo,  char * logMsg, char * encodedBuffer, int bufLen);
-
+```
+```
 void DisableLogging (struct vcLog *vcInfo)
 ```
 
 ###   Examples
 
-The following is a basic example of how this library can be used 
+The following is a basic example of how this library can be used:
+
 ```c
 #include "../src/cvec.h"
 
@@ -77,7 +83,7 @@ int main (){
 }
 ```
 
-This produces the log "LogFile.txt" :
+This produces the log "basiclog.shiviz" :
 
     MyProcess {"MyProcess":1}
     Initialization Complete
@@ -87,7 +93,6 @@ This produces the log "LogFile.txt" :
     Receiving Message
     MyProcess {"MyProcess":4}
     Example Complete
-
 
 
 An executable example of a similar program can be found in
