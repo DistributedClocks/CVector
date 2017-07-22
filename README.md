@@ -21,7 +21,8 @@ src/vclock/vclock.h
 src/mpack/mpack.h
 ```
 
-To use CVector simply import .src/cvec.h.
+To use CVector simply include `src/cvec.h`.
+
 You can compile your project by including the following header files:
 ```
 src/vclock/cvec.h src/vclock/vclock.h src/mpack/mpack.h
