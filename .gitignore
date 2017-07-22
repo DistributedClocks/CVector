@@ -66,3 +66,5 @@ example/client_server
 src/vclock/clock_test
 
 src/test/cvec_test
+
+example/basic_example

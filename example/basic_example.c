@@ -2,7 +2,7 @@
 
 int main (){
 
-    struct vcLog *vcInfo = initialize("MyProcess","basiclog");
+    struct vcLog *vcInfo = initCVector("MyProcess","basiclog");
     //Prepare a Message
     int size;
     char sendingMessage[50];

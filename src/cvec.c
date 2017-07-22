@@ -26,7 +26,7 @@
 #include "cvec.h"
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
-struct vcLog *initialize(char * pid, char * logName) {
+struct vcLog *initCVector(char * pid, char * logName) {
     char logBuf[FILE_MAX];
     FILE *vectorLog;
     mkdir(dirname(logName), 0777);

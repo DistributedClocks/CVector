@@ -51,7 +51,7 @@ int server()
     /* Get the socket */
     int sockfd = initSocket(SERVERPORT);
     /* Initialize a vector clock with id server and the log serverlogfile */
-    struct vcLog *vcInfo = initialize("server","serverlogfile");
+    struct vcLog *vcInfo = initCVector("server","serverlogfile");
 
     int i;
     int n = 0, nMinOne = 0, nMinTwo= 0;
@@ -102,7 +102,7 @@ int client()
     /* Get the socket */
     int sockfd = initSocket(CLIENTPORT);
     /* Initialize a vector clock with id client and the log clientlogfile */
-    struct vcLog *vcInfo = initialize("client","clientlogfile");
+    struct vcLog *vcInfo = initCVector("client","clientlogfile");
 
     int i;
     char msg[10];

@@ -58,21 +58,8 @@ struct vcLog {
  * @param pid The process id that the vector map is initialised with.
  * @param logName The name of the log file this program should write to.
  */
-struct vcLog *initialize(char * pid, char * logName);
+struct vcLog *initCVector(char * pid, char * logName);
 
-/**
- * Starts the logging mechanism of CVector. Logging is enabled by default.
- * This is a cosmetic function. Setting vcInfo->logging to 1 fulfils the same purpose.
- * @param vcInfo The vcLog configuration structure containing the vector clock.
- */
-void enableLogging(struct vcLog *vcInfo);
-
-/**
- * Stops the logging mechanism of CVector. Logging is enabled by default.
- * This is a cosmetic function. Setting vcInfo->logging to 0 fulfils the same purpose.
- * @param vcInfo The vcLog configuration structure containing the vector clock.
- */
-void disableLogging(struct vcLog *vcInfo);
 
 /**
  * Appends a message in the log file defined in the vcLog vcInfo structure.
@@ -117,5 +104,19 @@ char *prepareSend(struct vcLog *vcInfo, char * logMsg, char* packetContent, int 
  * @param bufLen Length of the buffer to initialise the MessagPack reader.
  */
 char *unpackReceive(struct vcLog *vcInfo,  char * logMsg, char * encodedBuffer, int bufLen);
+
+/**
+ * Enables the logging mechanism of CVector. Logging is turned on by default.
+ * This is a cosmetic function. Setting vcInfo->logging to 1 fulfils the same purpose.
+ * @param vcInfo The vcLog configuration structure containing the vector clock.
+ */
+void enableLogging(struct vcLog *vcInfo);
+
+/**
+ * Disables the logging mechanism of CVector. Logging is turned on by default.
+ * This is a cosmetic function. Setting vcInfo->logging to 0 fulfils the same purpose.
+ * @param vcInfo The vcLog configuration structure containing the vector clock.
+ */
+void disableLogging(struct vcLog *vcInfo);
 
 #endif
