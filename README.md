@@ -57,7 +57,7 @@ char *unpackReceive(struct vcLog *vcInfo,  char * logMsg, char * encodedBuffer, 
 ```
 void DisableLogging (struct vcLog *vcInfo)
 ```
-####   struct vcLog
+#####   struct vcLog
 
 ```c
 struct vcLog {
