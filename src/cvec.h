@@ -61,6 +61,20 @@ struct vcLog {
 struct vcLog *initialize(char * pid, char * logName);
 
 /**
+ * Starts the logging mechanism of CVector. Logging is enabled by default.
+ * This is a cosmetic function. Setting vcInfo->logging to 1 fulfils the same purpose.
+ * @param vcInfo The vcLog configuration structure containing the vector clock.
+ */
+void enableLogging(struct vcLog *vcInfo);
+
+/**
+ * Stops the logging mechanism of CVector. Logging is enabled by default.
+ * This is a cosmetic function. Setting vcInfo->logging to 0 fulfils the same purpose.
+ * @param vcInfo The vcLog configuration structure containing the vector clock.
+ */
+void disableLogging(struct vcLog *vcInfo);
+
+/**
  * Appends a message in the log file defined in the vcLog vcInfo structure.
  * @param vcInfo The vcLog configuration structure containing the vector clock.
  * @param logMsg Custom message will be written to the "vcInfo" log.
@@ -73,7 +87,7 @@ int writeLogMsg(struct vcLog *vcInfo, char* logMsg);
  * @param vcInfo The vcLog configuration structure containing the vector clock.
  * @param logMsg Custom message will be written to the "vcInfo" log.
  */
-int lovcInfoocalEvent(struct vcLog *vcInfo, char * logMsg);
+int logLocalEvent(struct vcLog *vcInfo, char * logMsg);
 
 /**
  * Encodes a buffer into a custom CVector data structure.
@@ -103,4 +117,5 @@ char *prepareSend(struct vcLog *vcInfo, char * logMsg, char* packetContent, int 
  * @param bufLen Length of the buffer to initialise the MessagPack reader.
  */
 char *unpackReceive(struct vcLog *vcInfo,  char * logMsg, char * encodedBuffer, int bufLen);
+
 #endif

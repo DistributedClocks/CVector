@@ -9,18 +9,14 @@ int main() {
     char hello[100];
     strcpy(hello, "MYMSG");
     struct vcLog *vcInfo2 = initialize("testingClock","mylogbile");
-    tick(&vcInfo2->vc, "testingClock");
-    tick(&vcInfo2->vc, "testingClock");
-    tick(&vcInfo2->vc, "testingClock");
-    tick(&vcInfo2->vc, "testingClock");
-    tick(&vcInfo2->vc, "testingClock");
 
     printf("Encoding...\n");
     printf("Message: %s\n",hello );
     int size;
-    char  * result  = prepareSend(vcInfo2, hello, "This is going to be written to file.", &size);
-    printf("%s\n",result );
-    tick(&vcInfo1->vc, vcInfo1->pid);
+    printf("Starting encoding.\n");
+    char  * result  = prepareSend(vcInfo2, "This is going to be written to file.", hello,  &size);
+/*    printf("%s\n",result );
+*/    tick(&vcInfo1->vc, vcInfo1->pid);
     tick(&vcInfo1->vc, "brackabracka");
     printf("Clock 1...\n");
     printVC(vcInfo1->vc);

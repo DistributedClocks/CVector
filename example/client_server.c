@@ -7,75 +7,64 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 
-#define SERVERPORT  "8080"    // the server port will be connecting to
-#define CLIENTPORT  "8081"    // the server port will be connecting to
+#define SERVERPORT  8080    // the server port will be connecting to
+#define CLIENTPORT  8081    // the server port will be connecting to
 #define SERVERIP    "127.0.0.1"
 #define MAXBUFLEN 100
 #define MESSAGES 10
 
 
 
-
-int initListener (char * hostPort) {
+/* Initialize a listening socket */
+int initSocket (int hostPort) {
     
-    int rv;
     int sockfd;
-    struct addrinfo hints;
-    struct addrinfo *servinfo, *p;
+    struct sockaddr_in l_addr;
 
-    memset(&hints, 0, sizeof hints);
-    hints.ai_family = AF_INET; // set to AF_INET to force IPv4
-    hints.ai_socktype = SOCK_DGRAM;
-    hints.ai_flags = AI_PASSIVE; // use my IP
-
-    if ((rv = getaddrinfo(NULL, hostPort, &hints, &servinfo)) != 0) {
-        fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
-        return 1;
+    /* Get a datagram socket */
+    if ( (sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) {
+        perror("Socket");
+        exit(errno);
     }
 
-    // loop through all the results and bind to the first we can
-    for(p = servinfo; p != NULL; p = p->ai_next) {
-        if ((sockfd = socket(p->ai_family, p->ai_socktype,
-                p->ai_protocol)) == -1) {
-            perror("socket");
-            continue;
-        }
+    /* Initialize the server address */
+    l_addr.sin_family = AF_INET;
+    l_addr.sin_port = htons(hostPort);
+    l_addr.sin_addr.s_addr = INADDR_ANY;
 
-        if (bind(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
-            close(sockfd);
-            perror("bind");
-            continue;
-        }
-
-        break;
+    /* Assign the port number to the socket the server address */
+    if ( bind(sockfd, (struct sockaddr*)&l_addr, sizeof(l_addr)) != 0 ) {
+        perror("Failed to bind a socket.");
+        exit(errno);
     }
-
-    if (p == NULL) {
-        fprintf(stderr, "failed to bind socket\n");
-        return 2;
-    }
-    freeaddrinfo(servinfo);
     return sockfd;
 }
 
+/* The server program */
 int server()
 {
     char buf[MAXBUFLEN];
     int size;
     struct sockaddr_in their_addr;
     socklen_t addr_len = sizeof(struct sockaddr_in);
-    int sockfd = initListener(SERVERPORT);
+
+    /* Get the socket */
+    int sockfd = initSocket(SERVERPORT);
+    /* Initialize a vector clock with id server and the log serverlogfile */
     struct vcLog *vcInfo = initialize("server","serverlogfile");
 
     int i;
     int n = 0, nMinOne = 0, nMinTwo= 0;
     char msg[10];
     for (i = 0; i < MESSAGES; i++) {
-        int numbytes = recvfrom(sockfd, buf, MAXBUFLEN-1 , 0, (struct sockaddr *)&their_addr, &addr_len);
+        /* Wait for a client message */
+        int numbytes = recvfrom(sockfd, buf, MAXBUFLEN-1 , 0,
+            (struct sockaddr *)&their_addr, &addr_len);
         memset(msg,0,10);
+        /* Decode the buffer, save the vector clock, and store the message. */
         strncpy(msg, unpackReceive(vcInfo, "Received message from client.", buf, numbytes), 10);
         printf("Received message from client: ");
-        printVC(vcInfo->vc);
+        /* Calculate fibonacci */
         if (strncmp(msg,"0",1) == 0){
                 nMinTwo = 0;
                 n = 0;
@@ -88,8 +77,9 @@ int server()
             n = nMinOne + nMinTwo;
         }
         snprintf(msg, 10, "%d", n);
-        char * inBuf = prepareSend(vcInfo, "Replying to client.", msg, &size);
-        printf("Sending message to client\n");
+        /* Encode the message and vector clock. */
+        char * inBuf = prepareSend(vcInfo, "Responding to client.", msg, &size);
+        printf("Responding to client\n");
         sendto(sockfd, inBuf, size, 0, (struct sockaddr *)&their_addr, addr_len);
     }
 
@@ -97,6 +87,7 @@ int server()
     return EXIT_SUCCESS;
 }
 
+/* The client program */
 int client()
 {
     char buf[MAXBUFLEN];
@@ -105,30 +96,29 @@ int client()
     struct sockaddr_in their_addr;
     socklen_t addr_len = sizeof(struct sockaddr_in);
     their_addr.sin_family = AF_INET;
-    their_addr.sin_port = htons(atoi(SERVERPORT));
+    their_addr.sin_port = htons(SERVERPORT);
     inet_pton(AF_INET, SERVERIP, &their_addr.sin_addr);
     
-    int sockfd = initListener(CLIENTPORT);
-    
+    /* Get the socket */
+    int sockfd = initSocket(CLIENTPORT);
+    /* Initialize a vector clock with id client and the log clientlogfile */
     struct vcLog *vcInfo = initialize("client","clientlogfile");
 
     int i;
     char msg[10];
     for (i = 0; i < MESSAGES; i++) {
         snprintf(msg, 10, "%d", i);
+        /* Encode the message and vector clock. */
         char * inBuf = prepareSend(vcInfo, "Sending message to server.", msg, &size);
         printf("Sending message to server\n");
-        int numbytes = sendto(sockfd, inBuf, size, 0, (struct sockaddr *)&their_addr, addr_len);
+        sendto(sockfd, inBuf, size, 0, (struct sockaddr *)&their_addr, addr_len);
         addr_len = sizeof their_addr;
-        if ((numbytes = recvfrom(sockfd, buf, MAXBUFLEN-1 , 0,
-            (struct sockaddr *)&their_addr, &addr_len)) == -1) {
-            perror("recvfrom");
-            exit(1);
-        }
+        int numbytes = recvfrom(sockfd, buf, MAXBUFLEN-1 , 0,
+            (struct sockaddr *)&their_addr, &addr_len);
+        /* Decode the buffer, save the vector clock, and store the message. */
         strncpy(msg, unpackReceive(vcInfo, "Received message from server.", buf, numbytes), 10);
         printf("Received message from server:\n");
-        printVC(vcInfo->vc);
-        printf("Got back: %s\n", msg);
+        printf("Received value %s from server.\n", msg);
     }
 
     close(sockfd);
@@ -137,8 +127,9 @@ int client()
 
 int main (){
 
-    system("fuser -n tcp -k 8080");
-    system("fuser -n tcp -k 8081");
+    /* Clean processes listening on the required ports */
+    //system("fuser -n tcp -k 8080");
+    //system("fuser -n tcp -k 8081");
 
     int pid=fork();
     if (pid==0){
@@ -148,4 +139,6 @@ int main (){
     else{ 
         server();
     }
+    /* Call a script to generate a Shiviz compatible log. */
+    system("./shiviz.sh");
 }

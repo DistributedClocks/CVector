@@ -6,11 +6,11 @@ EXAMPLE_DIR := $(MAKE_DIR)/example
 
 DEPS = src/cvec.h src/vclock/vclock.h src/mpack/mpack.h
 SOURCES := $(patsubst %.h,%.c, $(DEPS))
-OBJECTS := $(patsubst */%.h,%.o, $(DEPS))
+OBJECTS := $(patsubst %.h,%.o, $(notdir $(DEPS)))
 
 CC = gcc
 CFLAGS += -c -Wextra -Wall -Wall -Wshadow -Wpointer-arith -Wcast-qual
-CFLAGS += -m64 -std=gnu11 -pedantic
+CFLAGS += -std=c11 -pedantic
 # CFLAGS += -Wstrict-prototypes -Wmissing-prototypes
 LDFLAGS :=
 
@@ -39,14 +39,16 @@ cvec.o: src/cvec.c $(DEPS)
 		@$(CC) $(CFLAGS) $(SOURCES)
 
 libcvec.a: cvec.o
-		ar rcs src/libcvec.a $(OBJECTS)
-		ranlib src/libcvec.a
-		rm -f *.o
-		rm -f src/*.gch
+		@ar rcs src/libcvec.a $(OBJECTS)
+		@ranlib src/libcvec.a
+		@rm -f *.o
+		@rm -f src/*.gch
 
 libclean:
 		rm -f *.o *.a src/*.o src/*.gch
 
+
+# THis is an older makefile implementation which is kept for legacy purposes.
 
 # srcExt = c
 # srcDir = .
