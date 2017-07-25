@@ -41,7 +41,7 @@ gcc -o myApp src/libcvec.a
 
 ### Index
 ```
-struct vcLog *initialize(char * pid, char * logName);
+struct vcLog *initCVector(char * pid, char * logName);
 ```
 ```
 int writeLogMsg(struct vcLog *vcInfo, char* logMsg);
