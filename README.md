@@ -41,19 +41,19 @@ gcc -o myApp src/libcvec.a
 
 ### Index
 ```
-struct vcLog *initCVector(char * pid, char * logName);
+struct vcLog *initCVector(char *pid, char *logName);
 ```
 ```
-int writeLogMsg(struct vcLog *vcInfo, char* logMsg);
+int writeLogMsg(struct vcLog *vcInfo, char *logMsg);
 ```
 ```
-int loglocalEvent(struct vcLog *vcInfo, char * logMsg);
+int loglocalEvent(struct vcLog *vcInfo, char *logMsg);
 ```
 ```
-char *prepareSend(struct vcLog *vcInfo, char * logMsg, char* packetContent, int * encodeLen);
+char *prepareSend(struct vcLog *vcInfo, char *logMsg, char *packetContent, int *encodeLen);
 ```
 ```
-char *unpackReceive(struct vcLog *vcInfo,  char * logMsg, char * encodedBuffer, int bufLen);
+char *unpackReceive(struct vcLog *vcInfo,  char *logMsg, char *encodedBuffer, int bufLen);
 ```
 ```
 void DisableLogging (struct vcLog *vcInfo)
@@ -76,7 +76,7 @@ information about the logging procedure and file name.
  
 #####   initCVector
 ```c
-struct vcLog *initCVector(char * pid, char * logName)
+struct vcLog *initCVector(char *pid, char *logName)
 ```
 Initialises and returns a new vcLog structure. This vcLog structure contains the configuration of the current vector thread as well as the vector clock map and process id.
 This structure is the basis of any further operation in CVector.
@@ -84,7 +84,7 @@ Any log files with the same name as "logName" will be overwritten. "pid" should 
 
 #####   prepareSend
 ```c
-char *prepareSend(struct vcLog *vcInfo, char * logMsg, char* packetContent, int * encodeLen)
+char *prepareSend(struct vcLog *vcInfo, char *logMsg, char *packetContent, int *encodeLen)
 ```
 Decodes a GoVector buffer, updates the local vector clock, and returns the decoded data.
 This function takes a MessagePack buffer and extracts the vector clock as well as data.
@@ -93,7 +93,7 @@ In addition, prepareSend writes a custom defined message to the main CVector log
 
 #####   unpackReceive
 ```c
-char *unpackReceive(struct vcLog *vcInfo,  char * logMsg, char * encodedBuffer, int bufLen)
+char *unpackReceive(struct vcLog *vcInfo,  char *logMsg, char *encodedBuffer, int bufLen)
 ```
 Decodes a GoVector buffer, updates the local vector clock, and returns the 
 decoded data.
@@ -102,7 +102,7 @@ In addition, prepareSend writes a custom defined message to the main CVector log
 
 #####   logLocalEvent
 ```c
-int logLocalEvent(struct vcLog *vcInfo, char * logMsg)
+int logLocalEvent(struct vcLog *vcInfo, char *logMsg)
 ```
 Records a local event and increments the vector clock contained in "vcInfo".
 Also appends a message in the log file defined in the vcInfo structure.
@@ -110,7 +110,7 @@ Also appends a message in the log file defined in the vcInfo structure.
 #####   writeLogMsg
 
 ```c
-int writeLogMsg(struct vcLog *vcInfo, char* logMsg)
+int writeLogMsg(struct vcLog *vcInfo, char *logMsg)
 ```
 Appends a message in the log file defined in the vcLog vcInfo structure.
 
@@ -143,9 +143,9 @@ int main (){
     char sendingMessage[50];
     strcpy(sendingMessage, "ExampleMessage");
     printf("We are packing this message: %s\n", sendingMessage);
-    char * resultBuffer = prepareSend(vcInfo, "Sending Message", sendingMessage, &size);
+    char *resultBuffer = prepareSend(vcInfo, "Sending Message", sendingMessage, &size);
     //Unpack the message again
-    char * receivedMessage = unpackReceive(vcInfo, "Receiving Message", resultBuffer, size);
+    char *receivedMessage = unpackReceive(vcInfo, "Receiving Message", resultBuffer, size);
     printf("We received this message: %s\n", receivedMessage);
 
     //Can be called at any point 
