@@ -1,7 +1,7 @@
 #include "../vclock/vclock.h"
 
 void testBasicInit() {
-    struct vectorClock * n = NULL;
+    struct vectorClock *n = NULL;
     tick(&n, "a");
     tick(&n, "b");
     int result = findTicks(n, "a");
@@ -23,12 +23,12 @@ void testBasicInit() {
     }
 }
 void testCopy() {
-    struct vectorClock * n = NULL;
+    struct vectorClock *n = NULL;
     set(&n, "a", 4);
     set(&n, "b", 1);
     set(&n, "c", 3);
     set(&n, "d", 2);
-    struct vectorClock * nc = copy(n);
+    struct vectorClock *nc = copy(n);
 
     int resultan = findTicks(n, "a");
     int resultbn = findTicks(n, "b");
@@ -47,8 +47,8 @@ void testCopy() {
 }
 void testMerge() {
 
-    struct vectorClock * n1 = NULL;
-    struct vectorClock * n2 = NULL;
+    struct vectorClock *n1 = NULL;
+    struct vectorClock *n2 = NULL;
 
     set(&n1, "b", 1);
     set(&n1, "a", 2);

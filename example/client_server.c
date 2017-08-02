@@ -33,7 +33,7 @@ int initSocket (int hostPort) {
     l_addr.sin_addr.s_addr = INADDR_ANY;
 
     /* Assign the port number to the socket the server address */
-    if ( bind(sockfd, (struct sockaddr*)&l_addr, sizeof(l_addr)) != 0 ) {
+    if ( bind(sockfd, (struct sockaddr *)&l_addr, sizeof(l_addr)) != 0 ) {
         perror("Failed to bind a socket.");
         exit(errno);
     }
@@ -78,7 +78,7 @@ int server()
         }
         snprintf(msg, 10, "%d", n);
         /* Encode the message and vector clock. */
-        char * inBuf = prepareSend(vcInfo, "Responding to client.", msg, &size);
+        char *inBuf = prepareSend(vcInfo, "Responding to client.", msg, &size);
         printf("Responding to client\n");
         sendto(sockfd, inBuf, size, 0, (struct sockaddr *)&their_addr, addr_len);
     }
@@ -109,7 +109,7 @@ int client()
     for (i = 0; i < MESSAGES; i++) {
         snprintf(msg, 10, "%d", i);
         /* Encode the message and vector clock. */
-        char * inBuf = prepareSend(vcInfo, "Sending message to server.", msg, &size);
+        char *inBuf = prepareSend(vcInfo, "Sending message to server.", msg, &size);
         printf("Sending message to server\n");
         sendto(sockfd, inBuf, size, 0, (struct sockaddr *)&their_addr, addr_len);
         addr_len = sizeof their_addr;
