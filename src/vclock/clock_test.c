@@ -67,7 +67,7 @@ void testMerge() {
     if (result1n != 2 || result2n != 3 || result3n != 1 ){
          printf("Merge not as expected = %s , old = %s, %s\n",
             returnVCString(n3), returnVCString(n1), returnVCString(n2));
-    }else {
+    } else {
         printf("new = %s , old = %s, %s\n",
             returnVCString(n3), returnVCString(n1), returnVCString(n2));
     }

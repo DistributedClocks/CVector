@@ -19,7 +19,8 @@ int main() {
     tick(&vcInfo1->vc, "Testing..");
     printf("Clock 1...\n");
     printVC(vcInfo1->vc);
-    char * msg = unpackReceive(vcInfo1, result,"This has been unpacked from file.", 150);
+    printVC(vcInfo2->vc);
+    char * msg = unpackReceive(vcInfo1, "This has been unpacked from file.", result, size);
     printf("After decoding...\n");
     printf("Message: %s\n", msg );
     printVC(vcInfo1->vc);

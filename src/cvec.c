@@ -30,7 +30,7 @@ struct vcLog *initCVector(char *pid, char *logName) {
     char logBuf[FILE_MAX];
     FILE *vectorLog;
     mkdir(dirname(logName), 0777);
-    snprintf(logBuf, FILE_MAX, "%s.shiviz", logName);
+    snprintf(logBuf, FILE_MAX, "%s-shiviz.txt", logName);
 
     /*Test if is is possible to use the specified logfile */
     vectorLog = fopen(logBuf, "w+");
@@ -183,7 +183,7 @@ char *unpackReceive(struct vcLog *vcInfo,  char *logMsg, char *encodedBuffer, in
     char c_pid[VC_ID_LENGTH];
     mpack_expect_str_buf(&reader, src_pid, VC_ID_LENGTH);   // decode the source clock id
     int msgSize = mpack_expect_str(&reader);                // get the message length
-    char * msg = malloc(msgSize);                          // allocate a message buffer
+    char *msg = malloc(msgSize);                            // allocate a message buffer
     mpack_read_bytes(&reader, msg, msgSize);                // extract the message
     msg[msgSize] = '\0';                                    // terminate the string
 
