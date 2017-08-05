@@ -1,3 +1,0 @@
-/home/fruffy/Projects/Huawei/CVector/cmake-build-debug/CMakeFiles/rebuild_cache.dir
-/home/fruffy/Projects/Huawei/CVector/cmake-build-debug/CMakeFiles/edit_cache.dir
-/home/fruffy/Projects/Huawei/CVector/cmake-build-debug/CMakeFiles/CVector.dir
