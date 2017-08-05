@@ -77,7 +77,7 @@ struct vectorClock *copy(struct vectorClock *vc) {
     return vc_copy;
 }
 
-uint64_t findTicks(struct vectorClock *vc, char *c_id) {
+int64_t findTicks(struct vectorClock *vc, char *c_id) {
     struct vectorClock *clock;
     HASH_FIND_STR(vc, c_id, clock);
     if (clock==NULL)

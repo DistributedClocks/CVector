@@ -103,7 +103,7 @@ struct vectorClock *copy(struct vectorClock *vc);
  * @param vc The current vector clock map.
  * @param c_id The process id as string representation.
  */
-uint64_t findTicks(struct vectorClock *vc, char *c_id);
+int64_t findTicks(struct vectorClock *vc, char *c_id);
 
 /**
  * Returns the most recent update of all the clocks contained in the map.

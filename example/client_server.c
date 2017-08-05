@@ -13,7 +13,21 @@
 #define MAXBUFLEN 100
 #define MESSAGES 10
 
+/*
+ * Print reverse byte buffer including specified length
+ */
+int printNBytes(char * receiveBuffer, int num) {
+    int i;
 
+    // for (i = num-1; i>=0; i--) {
+    //  printf("%02x", (unsigned char) receiveBuffer[i]);
+    // }
+    for (i =0; i<=num-1; i++) {
+        printf("%02x", (unsigned char) receiveBuffer[i]);
+    }
+    printf("\n");
+    return i;
+}
 
 /* Initialize a listening socket */
 int initSocket (int hostPort) {
@@ -55,31 +69,33 @@ int server()
 
     int i;
     int n = 0, nMinOne = 0, nMinTwo= 0;
-    char msg[10];
+    int msgLen = 4;
+    char msg[msgLen];
     for (i = 0; i < MESSAGES; i++) {
         /* Wait for a client message */
         int numbytes = recvfrom(sockfd, buf, MAXBUFLEN-1 , 0,
             (struct sockaddr *)&their_addr, &addr_len);
-        memset(msg,0,10);
+        memset(msg,0,msgLen);
         /* Decode the buffer, save the vector clock, and store the message. */
-        strncpy(msg, unpackReceive(vcInfo, "Received message from client.", buf, numbytes), 10);
-        printf("Received message from client: ");
+        memcpy(msg, unpackReceive(vcInfo, "Received message from client.", buf, numbytes), sizeof(int));
+        int32_t* intMsg = (int32_t *)&msg[4];
+        printf("Received message from client: %d\n", *intMsg);
         /* Calculate fibonacci */
-        if (strncmp(msg,"0",1) == 0){
-                nMinTwo = 0;
-                n = 0;
-        } else if (strncmp(msg,"1",1) == 0){
-                nMinOne = 0;
-                n = 1;
+        if (*intMsg == 0){
+            nMinTwo = 0;
+            n = 0;
+        } else if (*intMsg == 1){
+            nMinOne = 0;
+            n = 1;
         } else {
             nMinTwo = nMinOne;
             nMinOne = n;
             n = nMinOne + nMinTwo;
         }
-        snprintf(msg, 10, "%d", n);
-        /* Encode the message and vector clock. */
-        char *inBuf = prepareSend(vcInfo, "Responding to client.", msg, &size);
-        printf("Responding to client\n");
+/*        snprintf(msg, 10, "%d", n);
+*/        /* Encode the message and vector clock. */
+        printf("Responding to client with value %d\n", n);
+        char *inBuf = prepare_i64(vcInfo, "Responding to client.", n, &size);
         sendto(sockfd, inBuf, size, 0, (struct sockaddr *)&their_addr, addr_len);
     }
 
@@ -105,20 +121,20 @@ int client()
     struct vcLog *vcInfo = initCVector("client","clientlogfile");
 
     int i;
-    char msg[10];
+    int msgLen = 4;
+    char msg[msgLen];
     for (i = 0; i < MESSAGES; i++) {
-        snprintf(msg, 10, "%d", i);
         /* Encode the message and vector clock. */
-        char *inBuf = prepareSend(vcInfo, "Sending message to server.", msg, &size);
+        char *inBuf = prepare_i64(vcInfo, "Sending message to server.", i , &size);
         printf("Sending message to server\n");
         sendto(sockfd, inBuf, size, 0, (struct sockaddr *)&their_addr, addr_len);
         addr_len = sizeof their_addr;
         int numbytes = recvfrom(sockfd, buf, MAXBUFLEN-1 , 0,
             (struct sockaddr *)&their_addr, &addr_len);
         /* Decode the buffer, save the vector clock, and store the message. */
-        strncpy(msg, unpackReceive(vcInfo, "Received message from server.", buf, numbytes), 10);
-        printf("Received message from server:\n");
-        printf("Received value %s from server.\n", msg);
+        memcpy(msg, unpackReceive(vcInfo, "Received message from server.", buf, numbytes), 4);
+        int32_t* intMsg = (int32_t *)&msg[0];
+        printf("Received value %d from server.\n", *intMsg);
     }
 
     close(sockfd);
@@ -130,15 +146,15 @@ int main (){
     /* Clean processes listening on the required ports */
     //system("fuser -n tcp -k 8080");
     //system("fuser -n tcp -k 8081");
-
-    int pid=fork();
+    server();
+    /*int pid=fork();
     if (pid==0){
         sleep(2);
         client();    
     }
     else{ 
         server();
-    }
+    }*/
     /* Call a script to generate a Shiviz compatible log. */
     system("./shiviz.sh");
 }

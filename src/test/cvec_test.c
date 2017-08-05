@@ -14,7 +14,7 @@ int main() {
     printf("Message: %s\n",hello );
     int size;
     printf("Starting encoding.\n");
-    char  * result  = prepareSend(vcInfo2, "This is going to be written to file.", hello,  &size);
+    char  * result  = prepareSend(vcInfo2, "This is going to be written to file.", hello, 100, &size);
     tick(&vcInfo1->vc, vcInfo1->pid);
     tick(&vcInfo1->vc, "Testing..");
     printf("Clock 1...\n");

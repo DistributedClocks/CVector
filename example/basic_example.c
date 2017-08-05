@@ -8,7 +8,7 @@ int main (){
     char sendingMessage[50];
     strcpy(sendingMessage, "ExampleMessage");
     printf("We are packing this message: %s\n", sendingMessage);
-    char * resultBuffer = prepareSend(vcInfo, "Sending Message", sendingMessage, &size);
+    char * resultBuffer = prepareSend(vcInfo, "Sending Message", sendingMessage, 50, &size);
     //Unpack the message again
     char * receivedMessage = unpackReceive(vcInfo, "Receiving Message", resultBuffer, size);
     printf("We received this message: %s\n", receivedMessage);

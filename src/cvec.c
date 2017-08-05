@@ -24,8 +24,9 @@
  */
 
 #include "cvec.h"
-/*pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-*/
+void mergeRemoteClock(struct vcLog *vcInfo, struct vectorClock *remoteClock);
+struct vectorClock *updateClock(struct vcLog *vcInfo, char *logMsg);
+
 struct vcLog *initCVector(char *pid, char *logName) {
     char logBuf[FILE_MAX];
     FILE *vectorLog;
@@ -87,49 +88,49 @@ int writeLogMsg(struct vcLog *vcInfo, char*logMsg) {
 int logLocalEvent(struct vcLog *vcInfo, char *logMsg) {
     /*Lock the global mutex */
     pthread_mutex_lock(&vcInfo->mutex);
-    struct vectorClock *vc = vcInfo->vc;
-    if (vc == NULL) {
-        perror("ERROR: Vector clock not initialized.");
-        return EXIT_FAILURE;
-    }
-    int time = findTicks(vc, vcInfo->pid);
-    if (time == -1) {
-        perror("ERROR: Could not find process id in its vector clock.");
-        return EXIT_FAILURE;
-    }
-    /*Increment the vector clock */
-    tick(&vc, vcInfo->pid);
-    
-    if (writeLogMsg(vcInfo, logMsg) == EXIT_FAILURE) {
-        perror("ERROR: Failed to log message.\n");
-    }
+
+    updateClock(vcInfo, logMsg);
     /*Free the global mutex */
     pthread_mutex_unlock(&vcInfo->mutex);
     return EXIT_SUCCESS;
 }
 
-char *prepareSend(struct vcLog *vcInfo, char *logMsg, char *packetContent, int *encodeLen) {
+char *prepareSend(struct vcLog *vcInfo, char *logMsg, char *packetContent, int packetLength, int *encodeLen) {
     /*Lock the global mutex */
     pthread_mutex_lock(&vcInfo->mutex);
-    struct vectorClock *vc = vcInfo->vc;
-    if (vc == NULL) {
-        perror("ERROR: Vector clock not initialized.");
-        return NULL;
+    struct vectorClock *vc = updateClock(vcInfo, logMsg);
+
+    /*Encode the message and append the current vector clock */
+    char *data;
+    size_t size;
+    mpack_writer_t writer;
+    mpack_writer_init_growable(&writer, &data, &size);
+    mpack_write_cstr(&writer, vcInfo->pid);                 // encode the clock id as str
+    mpack_write_bin(&writer, packetContent, packetLength);  // encode the message as binary
+
+    mpack_start_map(&writer, HASH_COUNT(vc));               // encode the vector clock as map
+    struct vectorClock *clock;
+    for(clock=vc; clock != NULL; clock=(struct vectorClock*)(clock->hh.next)) {
+        mpack_write_cstr(&writer, clock->id);               // encode the clock id as str
+        mpack_write_u64(&writer, clock->time);              // encode the clock time as uin64
     }
-    int time = findTicks(vc, vcInfo->pid);
-    if (time == -1) {
-        perror("ERROR: Could not find process id in its vector clock.");
-        return NULL;
+    mpack_finish_map(&writer);
+
+    if (mpack_writer_destroy(&writer) != mpack_ok) {
+        fprintf(stderr, "An error occurred encoding the data!\n");
+    return NULL;
     }
-    /*Increment the vector clock */
-    tick(&vc, vcInfo->pid);
-    
-    if (writeLogMsg(vcInfo, logMsg) == EXIT_FAILURE) {
-        perror("ERROR: Failed to log message.\n");
-    }
-//    printf("%s ",vcInfo->pid);
-//    printf("%s ",packetContent);
-//    printVC(vc);
+    /*Save the length of the encoded buffer in encodeLen */
+    *encodeLen = writer.size;
+    /*Free the global mutex */
+    pthread_mutex_unlock(&vcInfo->mutex);
+    return (char *) data;
+}
+
+char *prepare_str(struct vcLog *vcInfo, char *logMsg, char *packetContent, int *encodeLen) {
+    /*Lock the global mutex */
+    pthread_mutex_lock(&vcInfo->mutex);
+    struct vectorClock *vc = updateClock(vcInfo, logMsg);
 
     /*Encode the message and append the current vector clock */
     char *data;
@@ -158,13 +159,37 @@ char *prepareSend(struct vcLog *vcInfo, char *logMsg, char *packetContent, int *
     return (char *) data;
 }
 
-void mergeRemoteClock(struct vcLog *vcInfo, struct vectorClock *remoteClock) {
-    int time = findTicks(vcInfo->vc, vcInfo->pid);
-    if (time == -1) {
-        perror("ERROR: Could not find process id in its vector clock.");
-        return;
+char *prepare_i64(struct vcLog *vcInfo, char *logMsg, int64_t packetContent, int *encodeLen) {
+    /*Lock the global mutex */
+    pthread_mutex_lock(&vcInfo->mutex);
+    struct vectorClock *vc = updateClock(vcInfo, logMsg);
+
+    /*Encode the message and append the current vector clock */
+    char *data;
+    size_t size;
+    mpack_writer_t writer;
+    mpack_writer_init_growable(&writer, &data, &size);
+    mpack_write_cstr(&writer, vcInfo->pid);             // encode the clock id as str
+    mpack_write_i64(&writer, packetContent);            // encode the message as int
+
+    mpack_start_map(&writer, HASH_COUNT(vc));           // encode the vector clock as map
+    struct vectorClock *clock;
+    for(clock=vc; clock != NULL; clock=(struct vectorClock*)(clock->hh.next)) {
+        mpack_write_cstr(&writer, clock->id);           // encode the clock id as str
+        mpack_write_u64(&writer, clock->time);          // encode the clock time as uin64
     }
-    merge(vcInfo->vc,remoteClock);
+    mpack_finish_map(&writer);
+
+    if (mpack_writer_destroy(&writer) != mpack_ok) {
+        fprintf(stderr, "An error occurred encoding the data!\n");
+    return NULL;
+    }
+
+    /*Save the length of the encoded buffer in encodeLen */
+    *encodeLen = writer.size;
+    /*Free the global mutex */
+    pthread_mutex_unlock(&vcInfo->mutex);
+    return (char *) data;
 }
 
 char *unpackReceive(struct vcLog *vcInfo,  char *logMsg, char *encodedBuffer, int bufLen) {
@@ -177,15 +202,15 @@ char *unpackReceive(struct vcLog *vcInfo,  char *logMsg, char *encodedBuffer, in
         perror("ERROR: Encoded buffer content corrupted.\n");
         return NULL;
     }
-
     /*Decode the message*/
     char src_pid[VC_ID_LENGTH];
     char c_pid[VC_ID_LENGTH];
     mpack_expect_str_buf(&reader, src_pid, VC_ID_LENGTH);   // decode the source clock id
-    int msgSize = mpack_expect_str(&reader);                // get the message length
-    char *msg = malloc(msgSize);                            // allocate a message buffer
-    mpack_read_bytes(&reader, msg, msgSize);                // extract the message
-    msg[msgSize] = '\0';                                    // terminate the string
+//    int msgSize = mpack_expect_str(&reader);                // get the message length
+    int msgSize = mpack_expect_bin(&reader);                    // get the message length
+    char *msg = malloc(msgSize);                                // allocate a message buffer
+    mpack_read_bytes(&reader, msg, (msgSize));                  // extract the message
+    //msg[msgSize] = '\0';                                      // terminate the string
 
     /*Construct the attached clock */
     struct vectorClock *vc = NULL;
@@ -205,4 +230,31 @@ char *unpackReceive(struct vcLog *vcInfo,  char *logMsg, char *encodedBuffer, in
     /*Free the global mutex */
     pthread_mutex_unlock(&vcInfo->mutex);
     return msg;
+}
+
+void mergeRemoteClock(struct vcLog *vcInfo, struct vectorClock *remoteClock) {
+    int time = findTicks(vcInfo->vc, vcInfo->pid);
+    if (time == -1) {
+        perror("ERROR: Could not find process id in its vector clock.");
+        return;
+    }
+    merge(vcInfo->vc,remoteClock);
+}
+
+struct vectorClock *updateClock(struct vcLog *vcInfo, char *logMsg) {
+    struct vectorClock *vc = vcInfo->vc;
+    if (vc == NULL) {
+        perror("ERROR: Vector clock not initialized.");
+    }
+    int64_t time = findTicks(vc, vcInfo->pid);
+    if (time == -1) {
+        perror("ERROR: Could not find process id in its vector clock.");
+    }
+    /*Increment the vector clock */
+    tick(&vc, vcInfo->pid);
+
+    if (writeLogMsg(vcInfo, logMsg) == EXIT_FAILURE) {
+        perror("ERROR: Failed to log message.\n");
+    }
+    return vc;
 }
