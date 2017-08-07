@@ -13,21 +13,6 @@
 #define MAXBUFLEN 100
 #define MESSAGES 10
 
-/*
- * Print reverse byte buffer including specified length
- */
-int printNBytes(char * receiveBuffer, int num) {
-    int i;
-
-    // for (i = num-1; i>=0; i--) {
-    //  printf("%02x", (unsigned char) receiveBuffer[i]);
-    // }
-    for (i =0; i<=num-1; i++) {
-        printf("%02x", (unsigned char) receiveBuffer[i]);
-    }
-    printf("\n");
-    return i;
-}
 
 /* Initialize a listening socket */
 int initSocket (int hostPort) {
@@ -69,7 +54,7 @@ int server()
 
     int i;
     int n = 0, nMinOne = 0, nMinTwo= 0;
-    int msgLen = 4;
+    int msgLen = sizeof(int32_t);
     char msg[msgLen];
     for (i = 0; i < MESSAGES; i++) {
         /* Wait for a client message */
@@ -77,14 +62,17 @@ int server()
             (struct sockaddr *)&their_addr, &addr_len);
         memset(msg,0,msgLen);
         /* Decode the buffer, save the vector clock, and store the message. */
-        memcpy(msg, unpackReceive(vcInfo, "Received message from client.", buf, numbytes), sizeof(int));
-        int32_t* intMsg = (int32_t *)&msg[4];
-        printf("Received message from client: %d\n", *intMsg);
+        memcpy(msg, unpackReceive(vcInfo, "Received message from client.", buf, numbytes), msgLen);
+        /* Convert the integer back into host order */
+        int32_t intMsg;
+        memcpy(&intMsg, msg, msgLen);
+        intMsg = ntohl(intMsg);
+        printf("Received message from client: %d\n", intMsg);
         /* Calculate fibonacci */
-        if (*intMsg == 0){
+        if (intMsg == 0){
             nMinTwo = 0;
             n = 0;
-        } else if (*intMsg == 1){
+        } else if (intMsg == 1){
             nMinOne = 0;
             n = 1;
         } else {
@@ -92,10 +80,11 @@ int server()
             nMinOne = n;
             n = nMinOne + nMinTwo;
         }
-/*        snprintf(msg, 10, "%d", n);
-*/        /* Encode the message and vector clock. */
+        /* Encode the message and vector clock. */
+        /* We need to convert integers into network byte order to be interoperable */
         printf("Responding to client with value %d\n", n);
-        char *inBuf = prepare_i64(vcInfo, "Responding to client.", n, &size);
+        int32_t byteOrderInt = htonl(n);
+        char *inBuf = prepareSend(vcInfo, "Responding to client.", (char*) &byteOrderInt, msgLen, &size);
         sendto(sockfd, inBuf, size, 0, (struct sockaddr *)&their_addr, addr_len);
     }
 
@@ -121,20 +110,25 @@ int client()
     struct vcLog *vcInfo = initCVector("client","clientlogfile");
 
     int i;
-    int msgLen = 4;
+    int msgLen = sizeof(int32_t);
     char msg[msgLen];
     for (i = 0; i < MESSAGES; i++) {
         /* Encode the message and vector clock. */
-        char *inBuf = prepare_i64(vcInfo, "Sending message to server.", i , &size);
+        /* We need to convert integers into network byte order to be interoperable */
+        int32_t byteOrderInt = htonl(i);
+        char *inBuf = prepareSend(vcInfo, "Sending message to server.", (char*) &byteOrderInt, msgLen, &size);
         printf("Sending message to server\n");
         sendto(sockfd, inBuf, size, 0, (struct sockaddr *)&their_addr, addr_len);
         addr_len = sizeof their_addr;
         int numbytes = recvfrom(sockfd, buf, MAXBUFLEN-1 , 0,
             (struct sockaddr *)&their_addr, &addr_len);
         /* Decode the buffer, save the vector clock, and store the message. */
-        memcpy(msg, unpackReceive(vcInfo, "Received message from server.", buf, numbytes), 4);
-        int32_t* intMsg = (int32_t *)&msg[0];
-        printf("Received value %d from server.\n", *intMsg);
+        memcpy(msg, unpackReceive(vcInfo, "Received message from server.", buf, numbytes), msgLen);
+        /* Convert the integer back into host order */
+        int32_t intMsg;
+        memcpy(&intMsg, msg, msgLen);
+        intMsg = ntohl(intMsg);
+        printf("Received value %d from server.\n", intMsg);
     }
 
     close(sockfd);
@@ -146,15 +140,15 @@ int main (){
     /* Clean processes listening on the required ports */
     //system("fuser -n tcp -k 8080");
     //system("fuser -n tcp -k 8081");
-    server();
-    /*int pid=fork();
+
+    int pid=fork();
     if (pid==0){
         sleep(2);
-        client();    
+        client();
     }
     else{ 
         server();
-    }*/
+    }
     /* Call a script to generate a Shiviz compatible log. */
     system("./shiviz.sh");
 }

@@ -92,34 +92,6 @@ int logLocalEvent(struct vcLog *vcInfo, char *logMsg);
 char *prepareSend(struct vcLog *vcInfo, char *logMsg, char *packetContent, int packetLength, int *encodeLen);
 
 /**
- *Encodes a buffer into a custom CVector data structure.
- *The function increments the vector clock contained in "vcInfo", appends it to 
- *the "packetContent" and converts the full message into MessagePack format.
- *The resulting length of the encoded package is stored in "encodeLen".
- *In addition, prepareSend writes a custom defined message "logMsg" to the 
- *main CVector log.
- *@param vcInfo The vcLog configuration structure containing the vector clock.
- *@param logMsg Custom message will be written to the "vcInfo" log.
- *@param packetContent The actual content of the packet we want to send out.
- *@param encodeLen A storage integer for the final encoded packet length.
- */
-char *prepare_str(struct vcLog *vcInfo, char *logMsg, char *packetContent, int *encodeLen);
-
-/**
- *Encodes a buffer into a custom CVector data structure.
- *The function increments the vector clock contained in "vcInfo", appends it to 
- *the "packetContent" and converts the full message into MessagePack format.
- *The resulting length of the encoded package is stored in "encodeLen".
- *In addition, prepareSend writes a custom defined message "logMsg" to the 
- *main CVector log.
- *@param vcInfo The vcLog configuration structure containing the vector clock.
- *@param logMsg Custom message will be written to the "vcInfo" log.
- *@param packetContent The actual content of the packet we want to send out.
- *@param encodeLen A storage integer for the final encoded packet length.
- */
-char *prepare_i64(struct vcLog *vcInfo, char *logMsg, int64_t packetContent, int *encodeLen);
-
-/**
  *Decodes a GoVector buffer, updates the local vector clock, and returns the 
  *decoded data.
  *This function takes a MessagePack buffer and extracts the vector clock as 
