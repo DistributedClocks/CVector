@@ -56,6 +56,7 @@ char *prepareSend(struct vcLog *vcInfo, char *logMsg, char *packetContent, int *
 char *unpackReceive(struct vcLog *vcInfo,  char *logMsg, char *encodedBuffer, int bufLen);
 ```
 ```
+void EnableLogging (struct vcLog *vcInfo)
 void DisableLogging (struct vcLog *vcInfo)
 ```
 #####   struct vcLog
@@ -86,7 +87,7 @@ Any log files with the same name as "logName" will be overwritten. "pid" should 
 ```c
 char *prepareSend(struct vcLog *vcInfo, char *logMsg, char *packetContent, int *encodeLen)
 ```
-Decodes a GoVector buffer, updates the local vector clock, and returns the decoded data.
+Decodes a CVector buffer, updates the local vector clock, and returns the decoded data.
 This function takes a MessagePack buffer and extracts the vector clock as well as data.
 It increments the local vector clock, merges the unpacked clock with its own and returns a character representation of the data. 
 In addition, prepareSend writes a custom defined message to the main CVector log.
@@ -95,7 +96,7 @@ In addition, prepareSend writes a custom defined message to the main CVector log
 ```c
 char *unpackReceive(struct vcLog *vcInfo,  char *logMsg, char *encodedBuffer, int bufLen)
 ```
-Decodes a GoVector buffer, updates the local vector clock, and returns the 
+Decodes a CVector buffer, updates the local vector clock, and returns the 
 decoded data.
 This function takes a MessagePack buffer and extracts the vector clock as well as data. It increments the local vector clock, merges the unpacked clock with its own and returns a character representation of the data.
 In addition, prepareSend writes a custom defined message to the main CVector log.
