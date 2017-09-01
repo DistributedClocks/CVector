@@ -29,7 +29,7 @@
 int id_sort(struct vectorClock *a, struct vectorClock *b);
 
 
-struct vectorClock *clockInit(char *c_id) {
+struct vectorClock *clock_init(char *c_id) {
     struct vectorClock *newClock = NULL;
     struct vectorClock *clock = (struct vectorClock*)malloc(sizeof(struct vectorClock));
     strncpy(clock->id, c_id, VC_ID_LENGTH);
@@ -77,7 +77,7 @@ struct vectorClock *copy(struct vectorClock *vc) {
     return vc_copy;
 }
 
-int64_t findTicks(struct vectorClock *vc, char *c_id) {
+int64_t find_ticks(struct vectorClock *vc, char *c_id) {
     struct vectorClock *clock;
     HASH_FIND_STR(vc, c_id, clock);
     if (clock==NULL)
@@ -85,7 +85,7 @@ int64_t findTicks(struct vectorClock *vc, char *c_id) {
     return clock->time;
 }
 
-uint64_t lastUpdate (struct vectorClock *vc) {
+uint64_t last_update(struct vectorClock *vc) {
     uint64_t last = 0;
     struct vectorClock *clock;
     for(clock=vc; clock != NULL; clock=(struct vectorClock*)(clock->hh.next)) {
@@ -136,7 +136,7 @@ struct vectorClock *copy_sort(struct vectorClock *vc) {
 }
 
 /**TODO: Decide if we need sorting here.**/
-char *returnVCString(struct vectorClock *vc) {
+char *return_vc_string(struct vectorClock *vc) {
     int num_clocks = HASH_COUNT(vc);
 
     char *vcString = malloc(num_clocks *(20 + 20 + 4) + 2);
@@ -154,8 +154,8 @@ char *returnVCString(struct vectorClock *vc) {
     return vcString;
 }
 
-void printVC(struct vectorClock *vc) {
-    char *output = returnVCString(vc);
+void print_vc(struct vectorClock *vc) {
+    char *output = return_vc_string(vc);
     printf("%s\n",output);
     free(output);
 }

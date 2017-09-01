@@ -1,8 +1,8 @@
 # CC = gcc
 # CFLAGS += -c -Wextra -Wall -g3 -std=gnu11
-# LDFlags := 
+LDFLAGS += -lcheck -lsubunit -lpthread -lrt -lm
 DEPS = cvec.h vclock/vclock.h mpack/mpack.h
-app = test/cvec_test
+app = test/vclock_test
 
 objects := $(patsubst %.h,%.o, $(DEPS))
 

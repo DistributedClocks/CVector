@@ -50,7 +50,7 @@ struct vcLog *initCVector(char *pid, char *logName) {
     pthread_mutex_init(&vcInfo->mutex, NULL);
 
     /*Initialize the clock and increase the time once */
-    struct vectorClock *vc = clockInit(vcInfo->pid);
+    struct vectorClock *vc = clock_init(vcInfo->pid);
     tick(&vc, vcInfo->pid);
     vcInfo->vc = vc;
     if (writeLogMsg(vcInfo, "Initialization Complete") == EXIT_FAILURE) {
@@ -76,7 +76,7 @@ int writeLogMsg(struct vcLog *vcInfo, char*logMsg) {
         perror("ERROR: Could not open log file.");
         return EXIT_FAILURE;
     }
-    char *vcString = returnVCString(vcInfo->vc);
+    char *vcString = return_vc_string(vcInfo->vc);
     /*Calculate the length of the log message that is being written. */
     char logMessage[VC_ID_LENGTH + strlen(logMsg) + strlen(vcString) + 3];
     sprintf(logMessage, "%s %s\n%s\n", vcInfo->pid, vcString, logMsg);
@@ -168,7 +168,7 @@ char *unpackReceive(struct vcLog *vcInfo,  char *logMsg, char *encodedBuffer, in
 }
 
 void mergeRemoteClock(struct vcLog *vcInfo, struct vectorClock *remoteClock) {
-    int time = findTicks(vcInfo->vc, vcInfo->pid);
+    int time = find_ticks(vcInfo->vc, vcInfo->pid);
     if (time == -1) {
         perror("ERROR: Could not find process id in its vector clock.");
         return;
@@ -181,7 +181,7 @@ struct vectorClock *updateClock(struct vcLog *vcInfo, char *logMsg) {
     if (vc == NULL) {
         perror("ERROR: Vector clock not initialized.");
     }
-    int64_t time = findTicks(vc, vcInfo->pid);
+    int64_t time = find_ticks(vc, vcInfo->pid);
     if (time == -1) {
         perror("ERROR: Could not find process id in its vector clock.");
     }
