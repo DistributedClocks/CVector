@@ -1,27 +1,25 @@
 # CC = gcc
 # CFLAGS += -c -Wextra -Wall -g3 -std=gnu11
 LDFLAGS += -lcheck -lsubunit -lpthread -lrt -lm
-DEPS = cvec.h vclock/vclock.h mpack/mpack.h
-app = test/vclock_test
+DEPS = vclock/vclock.h mpack/mpack.h
+app = test/vclock_test test/cvec_test
+lib = -llibcvec
 
 objects := $(patsubst %.h,%.o, $(DEPS))
 
-# %.o: %.c $(DEPS)
-# 	$(CC) $(CFlags) -o $@ $< $(CFLAGS)
+all: $(app)
+	@-rm -r $(objects)
 
-# simplemake: $(app).o
-# 	@echo "Hello $(objects)"
-# 	@$(CC) -o $(app) $(app).o 
-
+test/vclock_test: $(objects)
+	@$(CC) -o $@ $@.c $(objects) $(LDFLAGS)
 
 %.o: %.c $(DEPS)
 	@$(CC) $(CFLAGS) -o $@ $<
 
-simplemake: $(app).o $(objects)
-	@$(CC) -o $(app) $(app).o $(objects) $(LDFLAGS)
-	@-rm -r $(app).o
-	@-rm -r $(objects)
+test/cvec_test:
+	@$(CC) -o $@ $@.c -L./ -lcvec $(LDFLAGS)
 
+cvec: 
 clean:
 	@echo "Cleaning..."
 	@-rm -r $(app)

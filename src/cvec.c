@@ -22,8 +22,14 @@
  *SOFTWARE.
  *
  */
+#include <sys/stat.h>
+#include <libgen.h>
+#include <pthread.h>
 
+#include "./mpack/mpack.h"
+#include "./mpack/mpack-config.h"
 #include "cvec.h"
+
 void mergeRemoteClock(struct vcLog *vcInfo, struct vectorClock *remoteClock);
 struct vectorClock *updateClock(struct vcLog *vcInfo, char *logMsg);
 

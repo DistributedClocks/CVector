@@ -186,12 +186,10 @@ END_TEST
 Suite *vclock_suite(void) {
     Suite *s;
     TCase *basic_tests;
-
     s = suite_create("vclock");
-
     /* Basic test case */
     basic_tests = tcase_create("Basic");
-
+    /*Current test cases */
     tcase_add_test(basic_tests, clock_init_test);
     tcase_add_test(basic_tests, tick_test);
     tcase_add_test(basic_tests, set_test);
@@ -206,7 +204,6 @@ Suite *vclock_suite(void) {
     tcase_add_test(basic_tests, copy_sort_test);
 
     suite_add_tcase(s, basic_tests);
-
     return s;
 }
 

@@ -23,7 +23,7 @@ int initSocket (int hostPort) {
     /* Get a datagram socket */
     if ( (sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) {
         perror("Socket");
-        exit(errno);
+        exit(1);
     }
 
     /* Initialize the server address */
@@ -34,7 +34,7 @@ int initSocket (int hostPort) {
     /* Assign the port number to the socket the server address */
     if ( bind(sockfd, (struct sockaddr *)&l_addr, sizeof(l_addr)) != 0 ) {
         perror("Failed to bind a socket.");
-        exit(errno);
+        exit(1);
     }
     return sockfd;
 }

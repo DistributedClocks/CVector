@@ -1,7 +1,6 @@
-MAKE_DIR = $(PWD)
+MAKE_DIR := $(PWD)
 
-CVEC_DIR    := $(MAKE_DIR)/src/ 
-VCLOCK_DIR  := $(MAKE_DIR)/src/vclock
+TEST_DIR    := $(MAKE_DIR)/src
 EXAMPLE_DIR := $(MAKE_DIR)/example
 
 DEPS = src/cvec.h src/vclock/vclock.h src/mpack/mpack.h
@@ -18,22 +17,17 @@ LDFLAGS :=
 export MAKE_DIR CC CFLAGS LDFLAGS
 
 all:
-	@$(MAKE) -C $(CVEC_DIR)
-	@$(MAKE) -C $(VCLOCK_DIR)
-	@$(MAKE) -C $(EXAMPLE_DIR)
+	@$(MAKE) -C $(TEST_DIR)
+	@$(MAKE) -C $(EXAMPLE_DIR) libmake
 
 
 .PHONY: clean
 clean:
-	@$(MAKE) -C $(CVEC_DIR) clean
-	@$(MAKE) -C $(VCLOCK_DIR) clean
+	@$(MAKE) -C $(TEST_DIR) clean
 	@$(MAKE) -C $(EXAMPLE_DIR) clean
 
 
 lib: libcvec.a
-MAKE_DIR = $(PWD)
-
-all: libcvec.a
 
 cvec.o: src/cvec.c $(DEPS)
 		@$(CC) $(CFLAGS) $(SOURCES)
@@ -45,4 +39,4 @@ libcvec.a: cvec.o
 		@rm -f src/*.gch
 
 libclean:
-		rm -f *.o *.a src/*.o src/*.gch
+		@rm -f *.o *.a src/*.o src/*.gch

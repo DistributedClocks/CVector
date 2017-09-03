@@ -26,11 +26,6 @@
 #define _HEADER_cvec_
 
 #include "./vclock/vclock.h"
-#include "./mpack/mpack.h"
-#include "./mpack/mpack-config.h"
-#include <sys/stat.h>
-#include <libgen.h>
-#include <pthread.h>
 
 /* Maximum file length of a CVector log */
 #define FILE_MAX 256

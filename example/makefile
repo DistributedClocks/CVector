@@ -4,12 +4,13 @@
 DEPS = ../src/cvec.h ../src/vclock/vclock.h ../src/mpack/mpack.h
 app := client_server basic_example
 lib = ../src/libcvec.a
+app-lib := $(patsubst %,%-lib, $(app))
 
 objects := $(patsubst %.h,%.o, $(DEPS))
 
+# Compile the program using the default dependencies
 
 all: $(app)
-	# @-rm -r $<.o
 	@-rm -r $(objects)
 
 $(app): $(objects)
@@ -23,5 +24,9 @@ clean:
 	@-rm -r $(app)
 	@-rm -r *.o
 
-libmake:
-	@$(CC) -o $(app) $(app).o $(lib) $(LDFLAGS)
+# Compile the program using the provided library file
+libmake: $(app-lib)
+
+%-lib:
+	@$(eval name := $(patsubst %-lib,%, $@))
+	@$(CC) -o $(name) $(name).c $(lib) $(LDFLAGS)
