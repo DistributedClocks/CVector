@@ -60,7 +60,17 @@ void set(struct vectorClock **vc, char *c_id, uint64_t ticks) {
         strncpy(clock->id, c_id, VC_ID_LENGTH);
         HASH_ADD_STR(*vc, id, clock);  /* id: name of key field */
     }
+    if (ticks <=0)
+        ticks = 1;
     clock->time = ticks;
+}
+
+int64_t find_ticks(struct vectorClock *vc, char *c_id) {
+    struct vectorClock *clock;
+    HASH_FIND_STR(vc, c_id, clock);
+    if (clock==NULL)
+        return -1;
+    return clock->time;
 }
 
 struct vectorClock *copy(struct vectorClock *vc) {
@@ -77,14 +87,6 @@ struct vectorClock *copy(struct vectorClock *vc) {
     return vc_copy;
 }
 
-int64_t find_ticks(struct vectorClock *vc, char *c_id) {
-    struct vectorClock *clock;
-    HASH_FIND_STR(vc, c_id, clock);
-    if (clock==NULL)
-        return -1;
-    return clock->time;
-}
-
 uint64_t last_update(struct vectorClock *vc) {
     uint64_t last = 0;
     struct vectorClock *clock;
@@ -92,7 +94,7 @@ uint64_t last_update(struct vectorClock *vc) {
         if(clock->time > last)
             last = clock->time;
     }
-    return clock->time;
+    return last;
 }
 
 void merge(struct vectorClock *vc, struct vectorClock *other) {
