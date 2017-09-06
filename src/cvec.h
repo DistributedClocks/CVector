@@ -54,7 +54,7 @@ struct vcLog {
  *@param pid The process id that the vector map is initialised with.
  *@param logName The name of the log file this program should write to.
  */
-struct vcLog *initCVector(char *pid, char *logName);
+struct vcLog *init_cvector(char *pid, char *logName);
 
 
 /**
@@ -62,7 +62,7 @@ struct vcLog *initCVector(char *pid, char *logName);
  *@param vcInfo The vcLog configuration structure containing the vector clock.
  *@param logMsg Custom message will be written to the "vcInfo" log.
  */
-int writeLogMsg(struct vcLog *vcInfo, char *logMsg);
+int write_log_msg(struct vcLog *vcInfo, char *logMsg);
 
 /**
  *Records a local event and increments the vector clock contained in "vcInfo".
@@ -70,7 +70,7 @@ int writeLogMsg(struct vcLog *vcInfo, char *logMsg);
  *@param vcInfo The vcLog configuration structure containing the vector clock.
  *@param logMsg Custom message will be written to the "vcInfo" log.
  */
-int logLocalEvent(struct vcLog *vcInfo, char *logMsg);
+int log_local_event(struct vcLog *vcInfo, char *logMsg);
 
 /**
  *Encodes a buffer into a custom CVector data structure.
@@ -84,7 +84,7 @@ int logLocalEvent(struct vcLog *vcInfo, char *logMsg);
  *@param packetContent The actual content of the packet we want to send out.
  *@param encodeLen A storage integer for the final encoded packet length.
  */
-char *prepareSend(struct vcLog *vcInfo, char *logMsg, char *packetContent, int packetLength, int *encodeLen);
+char *prepare_send(struct vcLog *vcInfo, char *logMsg, char *packetContent, int packetLength, int *encodeLen);
 
 /**
  *Decodes a GoVector buffer, updates the local vector clock, and returns the 
@@ -98,21 +98,22 @@ char *prepareSend(struct vcLog *vcInfo, char *logMsg, char *packetContent, int p
  *@param logMsg Custom message will be written to the "vcInfo" log.
  *@param encodedBuffer The buffer to be decoded.
  *@param bufLen Length of the buffer to initialise the MessagPack reader.
+  *@param msgSize Length of the message we decode from MessagePack.
  */
-char *unpackReceive(struct vcLog *vcInfo,  char *logMsg, char *encodedBuffer, int bufLen);
+char *unpack_receive(struct vcLog *vcInfo,  char *logMsg, char *encodedBuffer, int bufLen, int *msgSize);
 
 /**
  *Enables the logging mechanism of CVector. Logging is turned on by default.
  *This is a cosmetic function. Setting vcInfo->logging to 1 fulfils the same purpose.
  *@param vcInfo The vcLog configuration structure containing the vector clock.
  */
-void enableLogging(struct vcLog *vcInfo);
+void enable_logging(struct vcLog *vcInfo);
 
 /**
  *Disables the logging mechanism of CVector. Logging is turned on by default.
  *This is a cosmetic function. Setting vcInfo->logging to 0 fulfils the same purpose.
  *@param vcInfo The vcLog configuration structure containing the vector clock.
  */
-void disableLogging(struct vcLog *vcInfo);
+void disable_logging(struct vcLog *vcInfo);
 
 #endif

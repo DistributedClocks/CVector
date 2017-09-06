@@ -1,25 +1,24 @@
 # CC = gcc
 # CFLAGS += -c -Wextra -Wall -g3 -std=gnu11
-LDFLAGS += -lcheck -lsubunit -lpthread -lrt -lm
-DEPS = vclock/vclock.h mpack/mpack.h
-app = test/vclock_test test/cvec_test
-lib = -llibcvec
+LDFLAGS += -L./ -lcheck -lsubunit -lpthread -lrt -lm
+DEPS = ../vclock/vclock.h ../mpack/mpack.h 
+app = vclock_test cvec_test
 
 objects := $(patsubst %.h,%.o, $(DEPS))
 
 all: $(app)
 	@-rm -r $(objects)
+	@-rm -r ../cvec.o
 
-test/vclock_test: $(objects)
+vclock_test: $(objects)
 	@$(CC) -o $@ $@.c $(objects) $(LDFLAGS)
+
+cvec_test: ../cvec.o
+	@$(CC) -o $@ $@.c $(LDFLAGS) -L../ -lcvec
 
 %.o: %.c $(DEPS)
 	@$(CC) $(CFLAGS) -o $@ $<
 
-test/cvec_test:
-	@$(CC) -o $@ $@.c -L./ -lcvec $(LDFLAGS)
-
-cvec: 
 clean:
 	@echo "Cleaning..."
 	@-rm -r $(app)

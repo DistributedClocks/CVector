@@ -15,7 +15,7 @@
 
 
 /* Initialize a listening socket */
-int initSocket (int hostPort) {
+int init_socket(int hostPort) {
     
     int sockfd;
     struct sockaddr_in l_addr;
@@ -40,17 +40,16 @@ int initSocket (int hostPort) {
 }
 
 /* The server program */
-int server()
-{
+int server() {
     char buf[MAXBUFLEN];
     int size;
     struct sockaddr_in their_addr;
     socklen_t addr_len = sizeof(struct sockaddr_in);
 
     /* Get the socket */
-    int sockfd = initSocket(SERVERPORT);
+    int sockfd = init_socket(SERVERPORT);
     /* Initialize a vector clock with id server and the log serverlogfile */
-    struct vcLog *vcInfo = initCVector("server","serverlogfile");
+    struct vcLog *vcInfo = init_cvector("server","serverlogfile");
 
     int i;
     int n = 0, nMinOne = 0, nMinTwo= 0;
@@ -62,7 +61,7 @@ int server()
             (struct sockaddr *)&their_addr, &addr_len);
         memset(msg,0,msgLen);
         /* Decode the buffer, save the vector clock, and store the message. */
-        memcpy(msg, unpackReceive(vcInfo, "Received message from client.", buf, numbytes), msgLen);
+        memcpy(msg, unpack_receive(vcInfo, "Received message from client.", buf, numbytes, &msgLen), msgLen);
         /* Convert the integer back into host order */
         int32_t intMsg;
         memcpy(&intMsg, msg, msgLen);
@@ -84,7 +83,7 @@ int server()
         /* We need to convert integers into network byte order to be interoperable */
         printf("Responding to client with value %d\n", n);
         int32_t byteOrderInt = htonl(n);
-        char *inBuf = prepareSend(vcInfo, "Responding to client.", (char*) &byteOrderInt, msgLen, &size);
+        char *inBuf = prepare_send(vcInfo, "Responding to client.", (char*) &byteOrderInt, msgLen, &size);
         sendto(sockfd, inBuf, size, 0, (struct sockaddr *)&their_addr, addr_len);
     }
 
@@ -93,8 +92,7 @@ int server()
 }
 
 /* The client program */
-int client()
-{
+int client() {
     char buf[MAXBUFLEN];
     int size;
 
@@ -105,9 +103,9 @@ int client()
     inet_pton(AF_INET, SERVERIP, &their_addr.sin_addr);
     
     /* Get the socket */
-    int sockfd = initSocket(CLIENTPORT);
+    int sockfd = init_socket(CLIENTPORT);
     /* Initialize a vector clock with id client and the log clientlogfile */
-    struct vcLog *vcInfo = initCVector("client","clientlogfile");
+    struct vcLog *vcInfo = init_cvector("client","clientlogfile");
 
     int i;
     int msgLen = sizeof(int32_t);
@@ -116,14 +114,14 @@ int client()
         /* Encode the message and vector clock. */
         /* We need to convert integers into network byte order to be interoperable */
         int32_t byteOrderInt = htonl(i);
-        char *inBuf = prepareSend(vcInfo, "Sending message to server.", (char*) &byteOrderInt, msgLen, &size);
+        char *inBuf = prepare_send(vcInfo, "Sending message to server.", (char*) &byteOrderInt, msgLen, &size);
         printf("Sending message to server\n");
         sendto(sockfd, inBuf, size, 0, (struct sockaddr *)&their_addr, addr_len);
         addr_len = sizeof their_addr;
         int numbytes = recvfrom(sockfd, buf, MAXBUFLEN-1 , 0,
             (struct sockaddr *)&their_addr, &addr_len);
         /* Decode the buffer, save the vector clock, and store the message. */
-        memcpy(msg, unpackReceive(vcInfo, "Received message from server.", buf, numbytes), msgLen);
+        memcpy(msg, unpack_receive(vcInfo, "Received message from server.", buf, numbytes, &msgLen), msgLen);
         /* Convert the integer back into host order */
         int32_t intMsg;
         memcpy(&intMsg, msg, msgLen);

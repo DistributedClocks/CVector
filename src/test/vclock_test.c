@@ -18,7 +18,7 @@
   * MA 02110-1301, USA.
   */
 
-#include <check.h>
+#include "check.h"
 #include "../vclock/vclock.h"
 
 START_TEST(clock_init_test) {

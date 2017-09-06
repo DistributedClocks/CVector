@@ -1,6 +1,6 @@
 MAKE_DIR := $(PWD)
 
-TEST_DIR    := $(MAKE_DIR)/src
+TEST_DIR    := $(MAKE_DIR)/src/test
 EXAMPLE_DIR := $(MAKE_DIR)/example
 
 DEPS = src/cvec.h src/vclock/vclock.h src/mpack/mpack.h
@@ -19,7 +19,6 @@ export MAKE_DIR CC CFLAGS LDFLAGS
 all:
 	@$(MAKE) -C $(TEST_DIR)
 	@$(MAKE) -C $(EXAMPLE_DIR) libmake
-
 
 .PHONY: clean
 clean:
