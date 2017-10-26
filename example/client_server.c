@@ -1,11 +1,14 @@
 /*
 ** listener.c -- a datagram sockets "server" demo
 */
-#include "../src/cvec.h"
-
 #include <unistd.h>
 #include <arpa/inet.h>
-#include <netdb.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+
+#include "../src/cvec.h"
+
 
 #define SERVERPORT  8080    // the server port will be connecting to
 #define CLIENTPORT  8081    // the server port will be connecting to

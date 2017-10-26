@@ -28,7 +28,9 @@
 
 #include "./mpack/mpack.h"
 #include "./mpack/mpack-config.h"
+#include "./vclock/vclock.h"
 #include "cvec.h"
+
 
 void merge_remote_clock(struct vcLog *vcInfo, struct vectorClock *remoteClock);
 

@@ -25,11 +25,13 @@
 #ifndef _HEADER_cvec_
 #define _HEADER_cvec_
 
-#include "./vclock/vclock.h"
-
 /* Maximum file length of a CVector log */
 #define FILE_MAX 256
 
+#include <pthread.h>
+#ifndef VC_ID_LENGTH
+#define VC_ID_LENGTH 30
+#endif
 /**
  *This is the basic vcLog structure used in any CVector application.
  *It contains the thread-local vector clock and process as well as 
