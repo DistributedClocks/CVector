@@ -1,6 +1,6 @@
 # CC = gcc
 # CFLAGS += -c -Wextra -Wall -g3 -std=c11
-# LDFlags := 
+# LDFlags :=
 DEPS = ../src/cvec.h ../src/vclock/vclock.h ../src/mpack/mpack.h
 app := client_server basic_example
 lib = ../src/libcvec.a

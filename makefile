@@ -17,12 +17,12 @@ LDFLAGS :=
 export MAKE_DIR CC CFLAGS LDFLAGS
 
 all:
-	@$(MAKE) -C $(TEST_DIR)
-	@$(MAKE) -C $(EXAMPLE_DIR) libmake
+	# @$(MAKE) -C $(TEST_DIR) # Temporarily disabled
+	@$(MAKE) -C $(EXAMPLE_DIR)
 
 .PHONY: clean
 clean:
-	@$(MAKE) -C $(TEST_DIR) clean
+	#@$(MAKE) -C $(TEST_DIR) clean
 	@$(MAKE) -C $(EXAMPLE_DIR) clean
 
 
